@@ -8,7 +8,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     username: "admin",
-    password: "password123",
+    password: "[PASSWORD]",
   });
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
