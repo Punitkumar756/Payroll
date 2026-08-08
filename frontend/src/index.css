@@ -57,6 +57,7 @@
   --t-slow: 400ms ease;
 }
 
+
 /* ── Reset ──────────────────────────────────────────────────── */
 *,
 *::before,
@@ -84,6 +85,7 @@ body {
     radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.08) 0%, transparent 40%);
   background-attachment: fixed;
 }
+
 
 h1,
 h2,
