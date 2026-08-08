@@ -1,0 +1,21 @@
+import { Request, Response, NextFunction } from 'express';
+export declare const listSalaryHeads: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const createSalaryHead: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const updateSalaryHead: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const listCTCTemplates: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const createCTCTemplate: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const processPayroll: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const listPayslipsHR: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const editPayslipLine: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const approvePayslips: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const listAdvances: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const createAdvance: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const listLoansHR: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const approveLoan: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const getPayslipsSelf: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const getPayslipLinesSelf: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const downloadPayslipPDF: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const requestLoan: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const getLoansSelf: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const getLoanSchedule: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+//# sourceMappingURL=payrollController.d.ts.map
