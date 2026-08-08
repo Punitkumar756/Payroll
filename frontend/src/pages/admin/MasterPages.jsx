@@ -308,8 +308,8 @@ export function AnnouncementsPage() {
       columns={[
         { key: "heading", label: "Heading" },
         { key: "type", label: "Type" },
-        { key: "display_start_date", label: "Start Date" },
-        { key: "display_end_date", label: "End Date" },
+        { key: "display_start", label: "Start Date" },
+        { key: "display_end", label: "End Date" },
       ]}
       fields={[
         { key: "heading", label: "Heading", required: true },
@@ -324,13 +324,13 @@ export function AnnouncementsPage() {
           required: true,
         },
         {
-          key: "display_start_date",
+          key: "display_start",
           label: "Display Start Date",
           type: "date",
           required: true,
         },
         {
-          key: "display_end_date",
+          key: "display_end",
           label: "Display End Date",
           type: "date",
           required: true,
