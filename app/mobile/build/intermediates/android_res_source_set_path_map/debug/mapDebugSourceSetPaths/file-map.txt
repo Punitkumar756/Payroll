@@ -1,0 +1,8 @@
+com.ankitinfotech.employeeapp.mobile-pngs-0 C:\Users\New Hope\Desktop\pay\app\mobile\build\generated\res\pngs\debug
+com.ankitinfotech.employeeapp.mobile-updated_navigation_xml-1 C:\Users\New Hope\Desktop\pay\app\mobile\build\generated\updated_navigation_xml\debug
+com.ankitinfotech.employeeapp.mobile-packageDebugResources-2 C:\Users\New Hope\Desktop\pay\app\mobile\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.ankitinfotech.employeeapp.mobile-packageDebugResources-3 C:\Users\New Hope\Desktop\pay\app\mobile\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.ankitinfotech.employeeapp.mobile-debug-4 C:\Users\New Hope\Desktop\pay\app\mobile\build\intermediates\merged_res\debug\mergeDebugResources
+com.ankitinfotech.employeeapp.mobile-debug-5 C:\Users\New Hope\Desktop\pay\app\mobile\src\debug\res
+com.ankitinfotech.employeeapp.mobile-main-6 C:\Users\New Hope\Desktop\pay\app\mobile\src\main\res
+gradleHome-0 C:\Users\New Hope\.gradle

@@ -1,0 +1,7 @@
+com.ankitinfotech.employeeapp
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+style Theme_PerkPayrollMobile
+xml backup_rules
+xml data_extraction_rules
