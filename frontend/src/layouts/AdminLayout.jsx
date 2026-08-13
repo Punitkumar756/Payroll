@@ -15,8 +15,7 @@ const navSections = [
       { to: "/admin/masters/designations", icon: "💼", label: "Designations" },
       { to: "/admin/masters/categories", icon: "🏷️", label: "Categories" },
       { to: "/admin/masters/groups", icon: "👥", label: "Groups" },
-      { to: "/admin/masters/calendars", icon: "📅", label: "Calendars" },
-      { to: "/admin/masters/holidays", icon: "🎉", label: "Holidays" },
+      { to: "/admin/calendars", icon: "📅", label: "Calendars" },
       {
         to: "/admin/masters/announcements",
         icon: "📢",

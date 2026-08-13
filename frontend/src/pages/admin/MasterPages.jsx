@@ -7,8 +7,6 @@ import {
   categoriesApi,
   groupsApi,
   subGroupsApi,
-  calendarsApi,
-  holidaysApi,
   announcementsApi,
 } from "../../api";
 
@@ -228,75 +226,7 @@ export function SubGroupsPage() {
   );
 }
 
-// ── Calendars ─────────────────────────────────────────────────
-export function CalendarsPage() {
-  return (
-    <MasterPage
-      title="Calendars"
-      description="Manage work calendars"
-      api={calendarsApi}
-      columns={[
-        { key: "code", label: "Code" },
-        { key: "name", label: "Name" },
-        {
-          key: "is_active",
-          label: "Status",
-          render: (r) => (
-            <span
-              className={`badge ${r.is_active ? "badge-green" : "badge-gray"}`}
-            >
-              {r.is_active ? "Active" : "Inactive"}
-            </span>
-          ),
-        },
-      ]}
-      fields={[
-        { key: "code", label: "Code", required: true },
-        { key: "name", label: "Name", required: true },
-      ]}
-    />
-  );
-}
 
-// ── Holidays ──────────────────────────────────────────────────
-export function HolidaysPage() {
-  return (
-    <MasterPage
-      title="Holidays"
-      description="Manage organization holidays"
-      api={holidaysApi}
-      columns={[
-        { key: "code", label: "Code" },
-        { key: "name", label: "Holiday Name" },
-        { key: "start_date", label: "Start Date" },
-        { key: "end_date", label: "End Date" },
-        {
-          key: "is_week_off",
-          label: "Week Off",
-          render: (r) => (r.is_week_off ? "Yes" : "No"),
-        },
-        {
-          key: "is_optional",
-          label: "Optional",
-          render: (r) => (r.is_optional ? "Yes" : "No"),
-        },
-      ]}
-      fields={[
-        { key: "code", label: "Code", required: true },
-        { key: "name", label: "Name", required: true },
-        {
-          key: "start_date",
-          label: "Start Date",
-          type: "date",
-          required: true,
-        },
-        { key: "end_date", label: "End Date", type: "date", required: true },
-        { key: "is_week_off", label: "Is Week Off?", type: "checkbox" },
-        { key: "is_optional", label: "Is Optional?", type: "checkbox" },
-      ]}
-    />
-  );
-}
 
 // ── Announcements ─────────────────────────────────────────────
 export function AnnouncementsPage() {

@@ -122,9 +122,15 @@ export default function EmployeeListPage() {
                         </button>
                         <button 
                           className="btn"
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this employee?')) {
-                              toast.error("Delete not implemented");
+                          onClick={async () => {
+                            if (window.confirm('Are you sure you want to completely delete this employee? This action cannot be undone.')) {
+                              try {
+                                await employeesApi.remove(emp.id);
+                                toast.success("Employee deleted");
+                                load();
+                              } catch (err) {
+                                toast.error("Failed to delete employee");
+                              }
                             }
                           }}
                           style={{ padding: "0.5rem", background: "rgba(220,38,38,0.1)", color: "var(--clr-danger)", border: "none" }}

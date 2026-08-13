@@ -15,6 +15,7 @@ router.patch("/:id/status", requireRole("HR"), c.updateEmployeeStatus);
 router.put("/:id/statutory", requireRole("HR"), c.updateStatutory);
 router.post("/:id/user", requireRole("HR"), c.createUserForEmployee);
 router.post("/:id/ctc", requireRole("HR"), c.assignCTC);
+router.delete("/:id", requireRole("HR"), c.deleteEmployee);
 
 // Self-service: restricted update
 router.patch("/self/profile", c.selfUpdateEmployee);

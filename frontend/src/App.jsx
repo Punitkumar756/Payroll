@@ -19,10 +19,12 @@ import {
   CategoriesPage,
   GroupsPage,
   SubGroupsPage,
-  CalendarsPage,
-  HolidaysPage,
   AnnouncementsPage,
 } from "./pages/admin/MasterPages";
+
+import CalendarDashboard from "./pages/admin/calendar/CalendarDashboard";
+import CalendarCreate from "./pages/admin/calendar/CalendarCreate";
+import CalendarDetails from "./pages/admin/calendar/CalendarDetails";
 
 // Admin — Employees
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -129,12 +131,15 @@ export default function App() {
             <Route path="masters/categories" element={<CategoriesPage />} />
             <Route path="masters/groups" element={<GroupsPage />} />
             <Route path="masters/sub-groups" element={<SubGroupsPage />} />
-            <Route path="masters/calendars" element={<CalendarsPage />} />
-            <Route path="masters/holidays" element={<HolidaysPage />} />
             <Route
               path="masters/announcements"
               element={<AnnouncementsPage />}
             />
+
+            {/* Calendars Module */}
+            <Route path="calendars" element={<CalendarDashboard />} />
+            <Route path="calendars/create" element={<CalendarCreate />} />
+            <Route path="calendars/:id" element={<CalendarDetails />} />
 
             {/* Employees */}
             <Route path="employees" element={<EmployeeListPage />} />

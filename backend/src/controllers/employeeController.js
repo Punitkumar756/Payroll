@@ -252,3 +252,16 @@ export const assignRole = async (req, res, next) => {
     next(e);
   }
 };
+
+export const deleteEmployee = async (req, res, next) => {
+  try {
+    const result = await callSPOne("sp_employee_delete", [
+      req.user.role,
+      req.user.userId,
+      parseInt(req.params.id),
+    ]);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+};

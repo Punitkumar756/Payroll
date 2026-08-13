@@ -22,13 +22,32 @@ export const designationsApi = makeCRUD("/masters/designations");
 export const categoriesApi = makeCRUD("/masters/categories");
 export const groupsApi = makeCRUD("/masters/groups");
 export const subGroupsApi = makeCRUD("/masters/sub-groups");
-export const calendarsApi = makeCRUD("/masters/calendars");
-export const holidaysApi = makeCRUD("/masters/holidays");
+// calendarsApi and holidaysApi are replaced by the detailed calendars module API below
 export const announcementsApi = {
   list: (params) =>
     api.get("/masters/announcements", { params }).then((r) => r.data),
   create: (data) =>
     api.post("/masters/announcements", data).then((r) => r.data),
+};
+
+// ── Calendars ──────────────────────────────────────────────────
+export const calendarsApi = {
+  list: (params) => api.get("/calendars", { params }).then((r) => r.data),
+  get: (id) => api.get(`/calendars/${id}`).then((r) => r.data),
+  create: (data) => api.post("/calendars", data).then((r) => r.data),
+  update: (id, data) => api.put(`/calendars/${id}`, data).then((r) => r.data),
+  remove: (id) => api.delete(`/calendars/${id}`).then((r) => r.data),
+
+  getHolidays: (id) => api.get(`/calendars/${id}/holidays`).then((r) => r.data),
+  upsertHoliday: (id, data) => api.post(`/calendars/${id}/holidays`, data).then((r) => r.data),
+  removeHoliday: (id, holidayId) => api.delete(`/calendars/${id}/holidays/${holidayId}`).then((r) => r.data),
+
+  getWeeklyOffs: (id) => api.get(`/calendars/${id}/weekly-offs`).then((r) => r.data),
+  updateWeeklyOffs: (id, data) => api.put(`/calendars/${id}/weekly-offs`, data).then((r) => r.data),
+
+  getOverrides: (id) => api.get(`/calendars/${id}/dates`).then((r) => r.data),
+  upsertOverride: (id, data) => api.post(`/calendars/${id}/dates`, data).then((r) => r.data),
+  removeOverride: (id, date) => api.delete(`/calendars/${id}/dates/${date}`).then((r) => r.data),
 };
 
 // ── Employees ─────────────────────────────────────────────────
@@ -46,6 +65,7 @@ export const employeesApi = {
     api.post(`/employees/${id}/ctc`, data).then((r) => r.data),
   selfUpdate: (data) =>
     api.patch("/employees/self/profile", data).then((r) => r.data),
+  remove: (id) => api.delete(`/employees/${id}`).then((r) => r.data),
 };
 
 export const documentsApi = {
