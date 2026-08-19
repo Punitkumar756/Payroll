@@ -314,13 +314,17 @@ END$$
 DROP PROCEDURE IF EXISTS sp_master_holiday_list$$
 CREATE PROCEDURE sp_master_holiday_list(IN p_caller_role VARCHAR(30), IN p_calendar_id INT UNSIGNED)
 BEGIN
-  SELECT h.id, h.code, h.name, h.start_date, h.end_date, h.is_week_off, h.is_optional,
-         GROUP_CONCAT(hcm.calendar_id) AS calendar_ids
-  FROM holidays h
-  LEFT JOIN holiday_calendar_map hcm ON hcm.holiday_id=h.id
-  WHERE (p_calendar_id IS NULL OR hcm.calendar_id=p_calendar_id)
-  GROUP BY h.id
-  ORDER BY h.start_date;
+  SELECT h.id, 
+         '' AS code, 
+         h.holiday_name AS name, 
+         h.holiday_date AS start_date, 
+         h.holiday_date AS end_date, 
+         0 AS is_week_off, 
+         h.is_optional,
+         CAST(h.calendar_id AS CHAR) AS calendar_ids
+  FROM calendar_holidays h
+  WHERE (p_calendar_id IS NULL OR h.calendar_id=p_calendar_id)
+  ORDER BY h.holiday_date;
 END$$
 
 DROP PROCEDURE IF EXISTS sp_master_holiday_create$$
@@ -332,20 +336,20 @@ CREATE PROCEDURE sp_master_holiday_create(
   IN p_calendar_ids JSON
 )
 BEGIN
-  DECLARE v_id INT UNSIGNED;
+  DECLARE v_id INT UNSIGNED DEFAULT 0;
   DECLARE v_cal_id INT UNSIGNED;
   DECLARE v_idx INT DEFAULT 0;
   DECLARE v_len INT;
   IF p_caller_role != 'HR' THEN SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED:HR_ONLY'; END IF;
   IF p_end_date < p_start_date THEN SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = 'VALIDATION:end_before_start'; END IF;
-  INSERT INTO holidays (code,name,start_date,end_date,is_week_off,is_optional)
-  VALUES (TRIM(p_code),TRIM(p_name),p_start_date,p_end_date,p_is_week_off,p_is_optional);
-  SET v_id=LAST_INSERT_ID();
+  
   IF p_calendar_ids IS NOT NULL THEN
     SET v_len = JSON_LENGTH(p_calendar_ids);
     WHILE v_idx < v_len DO
       SET v_cal_id = JSON_EXTRACT(p_calendar_ids, CONCAT('$[',v_idx,']'));
-      INSERT IGNORE INTO holiday_calendar_map (holiday_id,calendar_id) VALUES (v_id,v_cal_id);
+      INSERT IGNORE INTO calendar_holidays (calendar_id, holiday_date, holiday_name, is_optional) 
+      VALUES (v_cal_id, p_start_date, TRIM(p_name), p_is_optional);
+      SET v_id = LAST_INSERT_ID();
       SET v_idx = v_idx+1;
     END WHILE;
   END IF;

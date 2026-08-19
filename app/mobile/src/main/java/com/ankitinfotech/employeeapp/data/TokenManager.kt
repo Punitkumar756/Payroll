@@ -18,15 +18,40 @@ class TokenManager(context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    fun saveToken(token: String) {
+    fun saveToken(token: String) =
         sharedPreferences.edit().putString("jwt_token", token).apply()
+
+    fun getToken(): String? =
+        sharedPreferences.getString("jwt_token", null)
+
+    fun saveEmployeeId(id: Int) =
+        sharedPreferences.edit().putInt("employee_id", id).apply()
+
+    fun getEmployeeId(): Int =
+        sharedPreferences.getInt("employee_id", -1)
+
+    fun saveUserName(firstName: String, lastName: String) {
+        sharedPreferences.edit()
+            .putString("first_name", firstName)
+            .putString("last_name", lastName)
+            .apply()
     }
 
-    fun getToken(): String? {
-        return sharedPreferences.getString("jwt_token", null)
-    }
+    fun getFirstName(): String? = sharedPreferences.getString("first_name", null)
+    fun getLastName(): String? = sharedPreferences.getString("last_name", null)
+
+    fun saveRole(role: String) =
+        sharedPreferences.edit().putString("role", role).apply()
+
+    fun getRole(): String? = sharedPreferences.getString("role", null)
 
     fun clearToken() {
-        sharedPreferences.edit().remove("jwt_token").apply()
+        sharedPreferences.edit()
+            .remove("jwt_token")
+            .remove("employee_id")
+            .remove("first_name")
+            .remove("last_name")
+            .remove("role")
+            .apply()
     }
 }

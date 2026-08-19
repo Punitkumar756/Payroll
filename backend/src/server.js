@@ -62,8 +62,10 @@ app.get("/api/health", (_req, res) => {
 // ── Error Handler (must be last) ──────────────────────────────
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`\n🚀 HRMS Backend running at http://localhost:${PORT}`);
+const HOST = '0.0.0.0';
+app.listen(PORT, HOST, () => {
+  console.log(`\n🚀 HRMS Backend running at http://${HOST}:${PORT}`);
+  console.log(`   Local access: http://localhost:${PORT}`);
   console.log(`   Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(
     `   Database:    ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,

@@ -27,12 +27,14 @@ export const getEmployee = async (req, res, next) => {
       req.user.employeeId ?? 0,
       parseInt(req.params.id),
     ]);
-    if (!emp)
+    if (!emp) {
       return res
         .status(404)
         .json({ error: "NOT_FOUND", detail: "Employee not found" });
+    }
     res.json(emp);
   } catch (e) {
+    console.error("Error in getEmployee:", e);
     next(e);
   }
 };

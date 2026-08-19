@@ -57,6 +57,6 @@ export function errorHandler(err, req, res, _next) {
     .status(500)
     .json({
       error: "INTERNAL_SERVER_ERROR",
-      detail: "An unexpected error occurred",
+      detail: err.message || "An unexpected error occurred",
     });
 }

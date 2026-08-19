@@ -29,3 +29,26 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Android build artifacts & local config
+app/build/
+app/mobile/build/
+app/.gradle/
+app/local.properties
+app/gradle/
+app/gradlew
+app/gradlew.bat
+
+# Antigravity IDE artifacts
+app/.artifacts/
+
+# Backend debug / one-off scripts
+backend/debug_sp.js
+backend/check_balance.js
+backend/diagnose_leave.js
+backend/fix_leave_balances.js
+backend/seed_balance.js
+backend/update_auth_sp.js
+backend/update_schema.js
+backend/update_sp.js
+backend/create_dashboard_sp.js

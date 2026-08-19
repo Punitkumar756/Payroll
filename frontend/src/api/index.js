@@ -30,6 +30,13 @@ export const announcementsApi = {
     api.post("/masters/announcements", data).then((r) => r.data),
 };
 
+export const holidaysApi = {
+  list: (params) =>
+    api.get("/masters/holidays", { params }).then((r) => r.data),
+  create: (data) =>
+    api.post("/masters/holidays", data).then((r) => r.data),
+};
+
 // ── Calendars ──────────────────────────────────────────────────
 export const calendarsApi = {
   list: (params) => api.get("/calendars", { params }).then((r) => r.data),

@@ -20,6 +20,7 @@ import {
   GroupsPage,
   SubGroupsPage,
   AnnouncementsPage,
+  HolidaysPage,
 } from "./pages/admin/MasterPages";
 
 import CalendarDashboard from "./pages/admin/calendar/CalendarDashboard";
@@ -62,6 +63,7 @@ import EssDashboard from "./pages/self-service/DashboardPage";
 import EssProfilePage from "./pages/self-service/EssProfilePage";
 import EssAttendancePage from "./pages/self-service/EssAttendancePage";
 import EssLeavePage from "./pages/self-service/EssLeavePage";
+import EssHolidaysPage from "./pages/self-service/EssHolidaysPage";
 import EssPayslipsPage from "./pages/self-service/EssPayslipsPage";
 import EssLoansPage from "./pages/self-service/EssLoansPage";
 
@@ -135,6 +137,10 @@ export default function App() {
               path="masters/announcements"
               element={<AnnouncementsPage />}
             />
+            <Route
+              path="masters/holidays"
+              element={<HolidaysPage />}
+            />
 
             {/* Calendars Module */}
             <Route path="calendars" element={<CalendarDashboard />} />
@@ -205,6 +211,7 @@ export default function App() {
             <Route path="profile" element={<EssProfilePage />} />
             <Route path="attendance" element={<EssAttendancePage />} />
             <Route path="leave" element={<EssLeavePage />} />
+            <Route path="holidays" element={<EssHolidaysPage />} />
             <Route path="payslips" element={<EssPayslipsPage />} />
             <Route path="loans" element={<EssLoansPage />} />
             <Route index element={<Navigate to="dashboard" replace />} />

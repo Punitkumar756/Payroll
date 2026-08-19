@@ -96,6 +96,19 @@ export const processTimecard = async (req, res, next) => {
 };
 
 // ── MANUAL UPDATE ─────────────────────────────────────────────
+
+/**
+ * Converts a plain time string (HH:MM or HH:MM:SS) into a full MySQL DATETIME
+ * string (YYYY-MM-DD HH:MM:SS) by combining it with the given date.
+ * Returns null if either argument is falsy.
+ */
+function toDatetime(date, time) {
+  if (!date || !time) return null;
+  // Normalise to HH:MM:SS
+  const timePart = time.length === 5 ? `${time}:00` : time;
+  return `${date} ${timePart}`;
+}
+
 export const manualAttendance = async (req, res, next) => {
   try {
     const {
@@ -106,16 +119,21 @@ export const manualAttendance = async (req, res, next) => {
       check_out,
       remarks,
     } = req.body;
+
+    // SP expects DATETIME ('YYYY-MM-DD HH:MM:SS'), not bare time strings
+    const checkInDt  = toDatetime(attendance_date, check_in);
+    const checkOutDt = toDatetime(attendance_date, check_out);
+
     res.json(
       await callSPOne("sp_attendance_manual_update", [
         req.user.role,
         req.user.userId,
-        employee_id ?? null,
+        employee_id   ?? null,
         attendance_date ?? null,
-        day_status ?? null,
-        check_in ?? null,
-        check_out ?? null,
-        remarks ?? null,
+        day_status    ?? null,
+        checkInDt,
+        checkOutDt,
+        remarks       ?? null,
       ]),
     );
   } catch (e) {

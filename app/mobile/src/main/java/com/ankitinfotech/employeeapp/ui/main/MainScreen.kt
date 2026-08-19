@@ -1,69 +1,148 @@
 package com.ankitinfotech.employeeapp.ui.main
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import com.ankitinfotech.employeeapp.ui.auth.LoginViewModel
 
-sealed class Screen(val route: String, val title: String) {
-    object Dashboard : Screen("dashboard", "Dashboard")
-    object Attendance : Screen("attendance", "Attendance")
-    object Leave : Screen("leave", "Leave")
-    object Payroll : Screen("payroll", "Payroll")
-    object Profile : Screen("profile", "Profile")
+// ── Navigation destinations ──────────────────────────────────────
+sealed class Screen(
+    val route: String,
+    val title: String,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
+    val showInBar: Boolean = true
+) {
+    object Dashboard    : Screen("dashboard",     "Home",       Icons.Filled.Home,         Icons.Outlined.Home)
+    object Attendance   : Screen("attendance",    "Attendance", Icons.Filled.AccessTime,   Icons.Outlined.AccessTime)
+    object Leave        : Screen("leave",         "Leave",      Icons.Filled.BeachAccess,  Icons.Outlined.BeachAccess)
+    object Payroll      : Screen("payroll",       "Payroll",    Icons.Filled.Payments,     Icons.Outlined.Payments)
+    object Profile      : Screen("profile",       "Profile",    Icons.Filled.Person,       Icons.Outlined.Person)
+    object Announcements: Screen("announcements", "Announcements",
+        Icons.Filled.Campaign, Icons.Outlined.Campaign, showInBar = false)
+    object Holidays     : Screen("holidays",      "Holidays",
+        Icons.Filled.Event,    Icons.Outlined.DateRange, showInBar = false)
 }
 
+private val bottomBarScreens = listOf(
+    Screen.Dashboard,
+    Screen.Attendance,
+    Screen.Leave,
+    Screen.Payroll,
+    Screen.Profile
+)
+
+// ── MainScreen ────────────────────────────────────────────────────
 @Composable
 fun MainScreen(loginViewModel: LoginViewModel) {
     val navController = rememberNavController()
 
-    val items = listOf(
-        Screen.Dashboard,
-        Screen.Attendance,
-        Screen.Leave,
-        Screen.Payroll,
-        Screen.Profile
-    )
+    // Shared ViewModels — scoped to MainScreen so state survives tab switches
+    val leaveViewModel:       LeaveViewModel       = viewModel()
+    val attendanceViewModel:  AttendanceViewModel  = viewModel()
+    val payrollViewModel:     PayrollViewModel     = viewModel()
+    val announcementsViewModel: AnnouncementsViewModel = viewModel()
+    val holidaysViewModel:    HolidaysViewModel    = viewModel()
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
-
-                items.forEach { screen ->
-                    NavigationBarItem(
-                        icon = { Text(screen.title.take(1)) },
-                        label = { Text(screen.title) },
-                        selected = currentRoute == screen.route,
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                }
-            }
+            HrmsBottomBar(navController)
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = Screen.Dashboard.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = {
+                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween(200))
+            },
+            exitTransition = {
+                slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween(200))
+            },
+            popEnterTransition = {
+                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.End, tween(200))
+            },
+            popExitTransition = {
+                slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End, tween(200))
+            }
         ) {
-            composable(Screen.Dashboard.route) { DashboardScreen() }
-            composable(Screen.Attendance.route) { AttendanceScreen() }
-            composable(Screen.Leave.route) { LeaveScreen() }
-            composable(Screen.Payroll.route) { PayrollScreen() }
-            composable(Screen.Profile.route) { ProfileScreen(loginViewModel) }
+            composable(Screen.Dashboard.route) {
+                DashboardScreen(
+                    onViewAnnouncements = {
+                        navController.navigate(Screen.Announcements.route)
+                    },
+                    onViewHolidays = {
+                        navController.navigate(Screen.Holidays.route)
+                    }
+                )
+            }
+            composable(Screen.Attendance.route) {
+                AttendanceScreen(attendanceViewModel)
+            }
+            composable(Screen.Leave.route) {
+                LeaveScreen(leaveViewModel)
+            }
+            composable(Screen.Payroll.route) {
+                PayrollScreen(payrollViewModel)
+            }
+            composable(Screen.Profile.route) {
+                ProfileScreen(loginViewModel)
+            }
+            composable(Screen.Announcements.route) {
+                AnnouncementsScreen(
+                    onBack = { navController.popBackStack() },
+                    viewModel = announcementsViewModel
+                )
+            }
+            composable(Screen.Holidays.route) {
+                HolidaysScreen(
+                    onBack = { navController.popBackStack() },
+                    viewModel = holidaysViewModel
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HrmsBottomBar(navController: NavHostController) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Don't show the bar on sub-screens
+    if (currentRoute == Screen.Announcements.route) return
+    if (currentRoute == Screen.Holidays.route) return
+
+    NavigationBar {
+        bottomBarScreens.forEach { screen ->
+            val selected = currentRoute == screen.route
+            NavigationBarItem(
+                selected = selected,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                icon = {
+                    Icon(
+                        imageVector = if (selected) screen.selectedIcon else screen.unselectedIcon,
+                        contentDescription = screen.title
+                    )
+                },
+                label = { Text(screen.title) }
+            )
         }
     }
 }

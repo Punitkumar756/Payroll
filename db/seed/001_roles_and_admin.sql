@@ -11,6 +11,6 @@ INSERT IGNORE INTO roles (id, name) VALUES
 INSERT IGNORE INTO employees (id, employee_code, first_name, last_name, joining_date, official_email, status)
 VALUES (1, 'EMP-001', 'System', 'Admin', CURDATE(), 'admin@ankitinfotech.com', 'Active');
 
--- password = Admin@1234
+-- password = Admin@1234  (bcrypt cost 12)
 INSERT IGNORE INTO users (id, employee_id, username, password_hash, role_id, is_active)
-VALUES (1, 1, 'admin', '$2a$12$2puxPBS7Lh1x6hWuHaK0NuEuqRvfN793LL2TDmTjeqamCSl.oYJNO', 1, 1);
+VALUES (1, 1, 'admin', '$2a$12$d3te0OW1K457yqJjSqqHrONz.smj9vBIELKWrYCTeIiCMxPcedIV2', 1, 1);

@@ -921,11 +921,11 @@ DROP PROCEDURE IF EXISTS sp_auth_login$$
 CREATE PROCEDURE sp_auth_login(IN p_username VARCHAR(100))
 BEGIN
   SELECT u.id AS user_id, u.employee_id, u.password_hash, u.is_active,
-         r.name AS role_name, e.first_name, e.last_name, e.official_email
+         r.name AS role_name, e.first_name, e.last_name, e.official_email, e.contact_number
   FROM users u
   JOIN roles r ON r.id = u.role_id
   LEFT JOIN employees e ON e.id = u.employee_id
-  WHERE u.username = p_username;
+  WHERE u.username = p_username OR e.official_email = p_username;
 END$$
 
 DROP PROCEDURE IF EXISTS sp_auth_update_last_login$$
@@ -1500,7 +1500,7 @@ CREATE PROCEDURE sp_attendance_request_correction(
 )
 BEGIN
   DECLARE v_id INT UNSIGNED;
-  IF p_caller_role NOT IN ('HR','Employee') THEN SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED'; END IF;
+  -- Any authenticated user can request correction for themselves
   INSERT INTO attendance_correction_requests (employee_id,attendance_date,requested_check_in,requested_check_out,reason)
   VALUES (p_caller_employee_id,p_att_date,p_requested_in,p_requested_out,p_reason);
   SET v_id=LAST_INSERT_ID();
@@ -1704,13 +1704,11 @@ BEGIN
   DECLARE v_allow_neg    TINYINT(1);
   DECLARE v_emp_id       INT UNSIGNED;
 
-  -- Employees can only apply for themselves
-  IF p_caller_role='Employee' THEN
-    SET v_emp_id=p_caller_employee_id;
-  ELSEIF p_caller_role='HR' THEN
-    SET v_emp_id=p_target_employee_id;
+  -- Allow any role to apply for themselves, HR can apply for others
+  IF p_caller_role = 'HR' THEN
+    SET v_emp_id = p_target_employee_id;
   ELSE
-    SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED';
+    SET v_emp_id = p_caller_employee_id;
   END IF;
 
   IF p_end_date < p_start_date THEN
@@ -1720,13 +1718,13 @@ BEGIN
   -- Check overlap
   IF EXISTS (
     SELECT 1 FROM leave_applications
-    WHERE employee_id=v_emp_id AND status IN ('Pending','Approved')
+    WHERE employee_id = v_emp_id AND status IN ('Pending','Approved')
       AND NOT (end_date < p_start_date OR start_date > p_end_date)
   ) THEN
     SIGNAL SQLSTATE '45002' SET MESSAGE_TEXT = 'CONFLICT:overlapping_leave';
   END IF;
 
-  -- Calculate working days (simplified: calendar days minus weekends)
+  -- Calculate working days
   SET v_total_days = DATEDIFF(p_end_date,p_start_date)+1
     - (FLOOR((DATEDIFF(p_end_date,p_start_date)+1)/7)*2)
     - IF(DAYOFWEEK(p_start_date)=1,1,0)
@@ -2356,12 +2354,12 @@ INSERT IGNORE INTO roles (id, name) VALUES
   (3, 'Employee');
 
 -- Initial HR Admin employee record
-INSERT IGNORE INTO employees (id, employee_code, first_name, last_name, joining_date, official_email, status)
-VALUES (1, 'EMP-001', 'System', 'Admin', CURDATE(), 'admin@ankitinfotech.com', 'Active');
+INSERT IGNORE INTO employees (id, employee_code, first_name, last_name, joining_date, official_email, contact_number, status)
+VALUES (1, 'EMP-001', 'System', 'Admin', CURDATE(), 'admin@ankitinfotech.com', '9876543210', 'Active');
 
--- password = Admin@1234
+-- password = 123456
 INSERT IGNORE INTO users (id, employee_id, username, password_hash, role_id, is_active)
-VALUES (1, 1, 'admin', '$2a$12$2puxPBS7Lh1x6hWuHaK0NuEuqRvfN793LL2TDmTjeqamCSl.oYJNO', 1, 1);
+VALUES (1, 1, 'admin@ankitinfotech.com', '$2a$12$phFxacKoTFK7Nu5AM.ojT.3Tu6pKYacJlS50S9RCZkZhMfIc4GLtC', 1, 1);
 -- =============================================================
 --  DB Permissions: EXECUTE-only application user
 --  Run as root/admin after schema is created

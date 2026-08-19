@@ -21,11 +21,13 @@ DROP PROCEDURE IF EXISTS sp_auth_login$$
 CREATE PROCEDURE sp_auth_login(IN p_username VARCHAR(100))
 BEGIN
   SELECT u.id AS user_id, u.employee_id, u.password_hash, u.is_active,
-         r.name AS role_name, e.first_name, e.last_name, e.official_email
+         r.name AS role_name, e.first_name, e.last_name,
+         e.official_email, e.contact_number
   FROM users u
   JOIN roles r ON r.id = u.role_id
   LEFT JOIN employees e ON e.id = u.employee_id
-  WHERE u.username = p_username;
+  WHERE u.username = p_username          -- existing web/admin login (username)
+     OR e.official_email = p_username;   -- mobile login (official email)
 END$$
 
 DROP PROCEDURE IF EXISTS sp_auth_update_last_login$$
@@ -161,7 +163,7 @@ CREATE PROCEDURE sp_employee_self_update(
   IN p_emergency_relation VARCHAR(50)
 )
 BEGIN
-  IF p_caller_role NOT IN ('HR','Employee') THEN
+  IF p_caller_role NOT IN ('HR','Employee','Manager') THEN
     SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED';
   END IF;
   UPDATE employees SET contact_number=p_contact_number WHERE id=p_caller_employee_id;
@@ -186,7 +188,7 @@ CREATE PROCEDURE sp_employee_get_by_id(
 )
 BEGIN
   -- Employees can only see their own record
-  IF p_caller_role = 'Employee' AND p_caller_employee_id != p_target_employee_id THEN
+  IF p_caller_role IN ('Employee', 'Manager') AND p_caller_employee_id != p_target_employee_id THEN
     SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED:own_record_only';
   END IF;
   SELECT

@@ -31,16 +31,40 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private fun checkToken() {
         if (tokenManager.getToken() != null) {
             _uiState.value = LoginUiState.Success("Already logged in")
+            // Fetch and save employeeId if missing
+            if (tokenManager.getEmployeeId() == -1) {
+                viewModelScope.launch {
+                    try {
+                        val response = apiService.getMe()
+                        if (response.isSuccessful && response.body() != null) {
+                            val user = response.body()!!
+                            val idToSave = user.employeeId ?: user.userId
+                            tokenManager.saveEmployeeId(idToSave)
+                        }
+                    } catch (e: Exception) {
+                        // Ignore error here
+                    }
+                }
+            }
         }
     }
 
-    fun login(email: String, password_hash: String) {
+    fun login(username: String, password: String) {
         _uiState.value = LoginUiState.Loading
         viewModelScope.launch {
             try {
-                val response = apiService.login(LoginRequest(email, password_hash))
+                val response = apiService.login(LoginRequest(username, password))
                 if (response.isSuccessful && response.body() != null) {
-                    tokenManager.saveToken(response.body()!!.token)
+                    val body = response.body()!!
+                    body.accessToken?.let { tokenManager.saveToken(it) }
+                    body.user?.let { user ->
+                        // If employeeId is missing, fallback to userId
+                        val idToSave = user.employeeId ?: user.userId
+                        tokenManager.saveEmployeeId(idToSave)
+                        
+                        tokenManager.saveUserName(user.firstName ?: "", user.lastName ?: "")
+                        tokenManager.saveRole(user.role ?: "")
+                    }
                     _uiState.value = LoginUiState.Success("Login successful")
                 } else {
                     _uiState.value = LoginUiState.Error("Invalid credentials")

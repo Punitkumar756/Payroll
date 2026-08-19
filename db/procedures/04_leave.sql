@@ -149,8 +149,8 @@ BEGIN
   DECLARE v_allow_neg    TINYINT(1);
   DECLARE v_emp_id       INT UNSIGNED;
 
-  -- Employees can only apply for themselves
-  IF p_caller_role='Employee' THEN
+  -- Employees and Managers can only apply for themselves
+  IF p_caller_role IN ('Employee', 'Manager') THEN
     SET v_emp_id=p_caller_employee_id;
   ELSEIF p_caller_role='HR' THEN
     SET v_emp_id=p_target_employee_id;
@@ -248,7 +248,7 @@ CREATE PROCEDURE sp_leave_cancel(
 BEGIN
   DECLARE v_emp_id INT UNSIGNED;
   SELECT employee_id INTO v_emp_id FROM leave_applications WHERE id=p_app_id;
-  IF p_caller_role='Employee' AND v_emp_id != p_caller_employee_id THEN
+  IF p_caller_role IN ('Employee', 'Manager') AND v_emp_id != p_caller_employee_id THEN
     SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED:own_record_only';
   END IF;
   UPDATE leave_applications SET status='Cancelled'

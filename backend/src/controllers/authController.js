@@ -12,33 +12,32 @@ export const login = async (req, res, next) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res
-        .status(400)
-        .json({
-          error: "VALIDATION_ERROR",
-          detail: "username and password required",
-        });
+      return res.status(400).json({
+        error: "VALIDATION_ERROR",
+        detail: "username (or official email) and password (or mobile number) required",
+      });
     }
 
+    // SP matches by users.username  OR  employees.official_email
     const user = await callSPOne("sp_auth_login", [username]);
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ error: "UNAUTHORIZED", detail: "Invalid credentials" });
+      return res.status(401).json({ error: "UNAUTHORIZED", detail: "Invalid credentials" });
     }
 
     if (!user.is_active) {
-      return res
-        .status(403)
-        .json({ error: "FORBIDDEN", detail: "Account is deactivated" });
+      return res.status(403).json({ error: "FORBIDDEN", detail: "Account is deactivated" });
     }
 
-    const valid = await comparePassword(password, user.password_hash);
-    if (!valid) {
-      return res
-        .status(401)
-        .json({ error: "UNAUTHORIZED", detail: "Invalid credentials" });
+    // Auth path 1 — bcrypt password (web / admin)
+    const validBcrypt = await comparePassword(password, user.password_hash);
+
+    // Auth path 2 — mobile number as password (mobile app)
+    // contact_number is now returned by sp_auth_login
+    const validMobile = !!(user.contact_number && password === user.contact_number);
+
+    if (!validBcrypt && !validMobile) {
+      return res.status(401).json({ error: "UNAUTHORIZED", detail: "Invalid credentials" });
     }
 
     const payload = {

@@ -7,6 +7,7 @@ const navItems = [
   { to: "/self-service/profile", icon: "👤", label: "My Profile" },
   { to: "/self-service/attendance", icon: "📅", label: "Attendance" },
   { to: "/self-service/leave", icon: "🌴", label: "Leave" },
+  { to: "/self-service/holidays", icon: "🎉", label: "Holidays" },
   { to: "/self-service/payslips", icon: "💰", label: "Payslips" },
   { to: "/self-service/loans", icon: "🏦", label: "Loans" },
 ];
