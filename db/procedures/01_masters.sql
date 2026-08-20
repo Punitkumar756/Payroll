@@ -163,31 +163,46 @@ END$$
 DROP PROCEDURE IF EXISTS sp_master_designation_list$$
 CREATE PROCEDURE sp_master_designation_list(IN p_caller_role VARCHAR(30))
 BEGIN
-  SELECT id, code, name, is_active FROM designations ORDER BY name;
+  SELECT d.id, d.code, d.name,
+         d.location_id,   l.name AS location_name,
+         d.department_id, dep.name AS department_name,
+         d.is_active
+  FROM designations d
+  LEFT JOIN locations   l   ON l.id   = d.location_id
+  LEFT JOIN departments dep ON dep.id = d.department_id
+  ORDER BY d.name;
 END$$
 
 DROP PROCEDURE IF EXISTS sp_master_designation_create$$
 CREATE PROCEDURE sp_master_designation_create(
-  IN p_caller_role VARCHAR(30), IN p_caller_uid INT UNSIGNED,
-  IN p_code VARCHAR(20), IN p_name VARCHAR(100)
+  IN p_caller_role  VARCHAR(30), IN p_caller_uid INT UNSIGNED,
+  IN p_code         VARCHAR(20), IN p_name VARCHAR(100),
+  IN p_location_id  INT UNSIGNED, IN p_department_id INT UNSIGNED
 )
 BEGIN
   DECLARE v_id INT UNSIGNED;
   IF p_caller_role != 'HR' THEN SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED:HR_ONLY'; END IF;
-  INSERT INTO designations (code, name) VALUES (TRIM(p_code), TRIM(p_name));
+  INSERT INTO designations (code, name, location_id, department_id)
+  VALUES (TRIM(p_code), TRIM(p_name), p_location_id, p_department_id);
   SET v_id = LAST_INSERT_ID();
-  CALL sp_audit_log(p_caller_uid, p_caller_role, 'sp_master_designation_create', CAST(v_id AS CHAR), 'CREATE', NULL, JSON_OBJECT('code',p_code,'name',p_name));
+  CALL sp_audit_log(p_caller_uid, p_caller_role, 'sp_master_designation_create', CAST(v_id AS CHAR), 'CREATE', NULL, JSON_OBJECT('code',p_code,'name',p_name,'location_id',p_location_id,'department_id',p_department_id));
   SELECT v_id AS id;
 END$$
 
 DROP PROCEDURE IF EXISTS sp_master_designation_update$$
 CREATE PROCEDURE sp_master_designation_update(
-  IN p_caller_role VARCHAR(30), IN p_caller_uid INT UNSIGNED,
-  IN p_id INT UNSIGNED, IN p_code VARCHAR(20), IN p_name VARCHAR(100), IN p_is_active TINYINT(1)
+  IN p_caller_role  VARCHAR(30), IN p_caller_uid INT UNSIGNED,
+  IN p_id           INT UNSIGNED, IN p_code VARCHAR(20), IN p_name VARCHAR(100),
+  IN p_location_id  INT UNSIGNED, IN p_department_id INT UNSIGNED,
+  IN p_is_active    TINYINT(1)
 )
 BEGIN
   IF p_caller_role != 'HR' THEN SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED:HR_ONLY'; END IF;
-  UPDATE designations SET code=TRIM(p_code), name=TRIM(p_name), is_active=p_is_active WHERE id=p_id;
+  UPDATE designations
+  SET code=TRIM(p_code), name=TRIM(p_name),
+      location_id=p_location_id, department_id=p_department_id,
+      is_active=p_is_active
+  WHERE id=p_id;
   SELECT ROW_COUNT() AS affected;
 END$$
 
@@ -291,14 +306,14 @@ END$$
 -- ── CALENDARS ────────────────────────────────────────────────
 DROP PROCEDURE IF EXISTS sp_master_calendar_list$$
 CREATE PROCEDURE sp_master_calendar_list(IN p_caller_role VARCHAR(30))
-BEGIN SELECT id, code, name, is_active FROM calendars ORDER BY name; END$$
+BEGIN SELECT id, calendar_code AS code, calendar_name AS name, is_active FROM calendars ORDER BY calendar_name; END$$
 
 DROP PROCEDURE IF EXISTS sp_master_calendar_create$$
 CREATE PROCEDURE sp_master_calendar_create(IN p_caller_role VARCHAR(30), IN p_caller_uid INT UNSIGNED, IN p_code VARCHAR(20), IN p_name VARCHAR(100))
 BEGIN
   DECLARE v_id INT UNSIGNED;
   IF p_caller_role != 'HR' THEN SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED:HR_ONLY'; END IF;
-  INSERT INTO calendars (code,name) VALUES (TRIM(p_code),TRIM(p_name));
+  INSERT INTO calendars (calendar_code, calendar_name) VALUES (TRIM(p_code), TRIM(p_name));
   SET v_id=LAST_INSERT_ID(); SELECT v_id AS id;
 END$$
 
@@ -306,7 +321,7 @@ DROP PROCEDURE IF EXISTS sp_master_calendar_update$$
 CREATE PROCEDURE sp_master_calendar_update(IN p_caller_role VARCHAR(30), IN p_caller_uid INT UNSIGNED, IN p_id INT UNSIGNED, IN p_code VARCHAR(20), IN p_name VARCHAR(100), IN p_is_active TINYINT(1))
 BEGIN
   IF p_caller_role != 'HR' THEN SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED:HR_ONLY'; END IF;
-  UPDATE calendars SET code=TRIM(p_code),name=TRIM(p_name),is_active=p_is_active WHERE id=p_id;
+  UPDATE calendars SET calendar_code=TRIM(p_code), calendar_name=TRIM(p_name), is_active=p_is_active WHERE id=p_id;
   SELECT ROW_COUNT() AS affected;
 END$$
 

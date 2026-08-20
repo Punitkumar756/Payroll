@@ -28,6 +28,18 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         _uiState.value = DashboardUiState.Loading
         viewModelScope.launch {
             try {
+                // First, ensure TokenManager has up-to-date user info (like name)
+                try {
+                    val meResp = apiService.getMe()
+                    if (meResp.isSuccessful && meResp.body() != null) {
+                        val user = meResp.body()!!
+                        tokenManager.saveUserName(user.firstName ?: "", user.lastName ?: "")
+                        // Also update employeeId if it was fallback to userId before
+                        val idToSave = user.employeeId ?: user.userId
+                        tokenManager.saveEmployeeId(idToSave)
+                    }
+                } catch (_: Exception) {}
+
                 val response = apiService.getDashboardSummary()
                 if (response.isSuccessful && response.body() != null) {
                     var summary = response.body()!!

@@ -30,7 +30,7 @@ export const getEmployeeDashboard = async (req, res, next) => {
     const leaveBalances = await callSP("sp_leave_get_balance_self", [empId, year]);
 
     // Get employee calendar for holidays
-    const emp = await callSPOne("sp_employee_get_by_id", [role, empId, empId]);
+    const emp = await callSPOne("sp_employee_get_by_id", [role, empId, empId, process.env.AES_KEY]);
     const holidays = await callSP("sp_master_holiday_list", [role, emp?.calendar_id || null]);
 
     res.json({

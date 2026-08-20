@@ -184,7 +184,8 @@ DROP PROCEDURE IF EXISTS sp_employee_get_by_id$$
 CREATE PROCEDURE sp_employee_get_by_id(
   IN p_caller_role        VARCHAR(30),
   IN p_caller_employee_id INT UNSIGNED,
-  IN p_target_employee_id INT UNSIGNED
+  IN p_target_employee_id INT UNSIGNED,
+  IN p_enc_key            VARCHAR(100)
 )
 BEGIN
   -- Employees can only see their own record
@@ -196,24 +197,34 @@ BEGIN
     e.date_of_birth, e.gender, e.joining_date, e.confirmation_date,
     e.status, e.official_email, e.personal_email, e.contact_number, e.badge_id,
     e.photo_path,
-    d.name AS department_name, des.name AS designation_name,
-    l.name AS location_name, c.name AS category_name,
-    g.name AS group_name, sg.name AS sub_group_name,
-    cal.name AS calendar_name,
+    -- FK IDs (needed by edit form dropdowns)
+    e.department_id, e.designation_id, e.location_id, e.category_id,
+    e.group_id, e.sub_group_id, e.calendar_id, e.reporting_manager_id,
+    -- Joined names for display
+    d.name   AS department_name,
+    des.name AS designation_name,
+    l.name   AS location_name,
+    c.name   AS category_name,
+    g.name   AS group_name,
+    sg.name  AS sub_group_name,
+    cal.calendar_name AS calendar_name,
     CONCAT(m.first_name,' ',m.last_name) AS reporting_manager_name,
-    -- Statutory (masked for employee, full for HR)
+    -- Statutory: plain fields
     sd.pf_number, sd.esi_number, sd.uan_number,
-    IF(p_caller_role='HR', sd.bank_name, sd.bank_name) AS bank_name,
-    IF(p_caller_role='HR', sd.bank_ifsc, sd.bank_ifsc) AS bank_ifsc
+    sd.bank_name, sd.bank_ifsc, sd.bank_branch,
+    -- Statutory: decrypted encrypted fields (HR only)
+    IF(p_caller_role='HR', CAST(AES_DECRYPT(sd.pan_encrypted,          p_enc_key) AS CHAR), NULL) AS pan,
+    IF(p_caller_role='HR', CAST(AES_DECRYPT(sd.aadhaar_encrypted,      p_enc_key) AS CHAR), NULL) AS aadhaar,
+    IF(p_caller_role='HR', CAST(AES_DECRYPT(sd.bank_account_encrypted, p_enc_key) AS CHAR), NULL) AS bank_account
   FROM employees e
-  LEFT JOIN departments d   ON d.id=e.department_id
+  LEFT JOIN departments d    ON d.id=e.department_id
   LEFT JOIN designations des ON des.id=e.designation_id
-  LEFT JOIN locations l     ON l.id=e.location_id
-  LEFT JOIN categories c    ON c.id=e.category_id
-  LEFT JOIN `groups` g      ON g.id=e.group_id
-  LEFT JOIN sub_groups sg   ON sg.id=e.sub_group_id
-  LEFT JOIN calendars cal   ON cal.id=e.calendar_id
-  LEFT JOIN employees m     ON m.id=e.reporting_manager_id
+  LEFT JOIN locations l      ON l.id=e.location_id
+  LEFT JOIN categories c     ON c.id=e.category_id
+  LEFT JOIN `groups` g       ON g.id=e.group_id
+  LEFT JOIN sub_groups sg    ON sg.id=e.sub_group_id
+  LEFT JOIN calendars cal    ON cal.id=e.calendar_id
+  LEFT JOIN employees m      ON m.id=e.reporting_manager_id
   LEFT JOIN employee_statutory_details sd ON sd.employee_id=e.id
   WHERE e.id=p_target_employee_id;
 END$$

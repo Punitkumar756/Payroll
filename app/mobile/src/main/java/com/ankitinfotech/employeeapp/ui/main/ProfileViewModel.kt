@@ -50,7 +50,11 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
                 val response = apiService.getEmployeeDetails(employeeId)
                 if (response.isSuccessful && response.body() != null) {
-                    _uiState.value = ProfileUiState.Success(response.body()!!)
+                    val employee = response.body()!!
+                    _uiState.value = ProfileUiState.Success(employee)
+                    
+                    // Update TokenManager with potentially updated basic info
+                    tokenManager.saveUserName(employee.first_name ?: "", employee.last_name ?: "")
                 } else {
                     val errorMsg = try {
                         val json = response.errorBody()?.string()

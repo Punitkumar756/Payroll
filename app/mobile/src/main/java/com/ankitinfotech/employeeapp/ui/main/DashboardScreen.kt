@@ -38,6 +38,11 @@ fun DashboardScreen(
     val uiState by viewModel.uiState.collectAsState()
     var isRefreshing by remember { mutableStateOf(false) }
 
+    // Re-fetch dashboard data when screen is shown to ensure fresh data (especially user name)
+    LaunchedEffect(Unit) {
+        viewModel.refresh()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
