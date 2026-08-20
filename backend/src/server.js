@@ -10,7 +10,7 @@ import masterRoutes from "./routes/masters.js";
 import employeeRoutes from "./routes/employees.js";
 import attendanceRoutes from "./routes/attendance.js";
 import leaveRoutes from "./routes/leave.js";
-import payrollRoutes from "./routes/payroll.js";
+
 import documentRoutes from "./routes/documents.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import calendarRoutes from "./routes/calendar.js";
@@ -45,7 +45,7 @@ app.use("/api/masters", masterRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leave", leaveRoutes);
-app.use("/api/payroll", payrollRoutes);
+
 app.use("/api/documents", documentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/calendars", calendarRoutes);

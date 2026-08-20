@@ -60,21 +60,6 @@ const navSections = [
       { to: "/admin/leave/calendar", icon: "📆", label: "Leave Calendar" },
     ],
   },
-  {
-    label: "Payroll",
-    items: [
-      { to: "/admin/payroll/salary-heads", icon: "💰", label: "Salary Heads" },
-      {
-        to: "/admin/payroll/ctc-templates",
-        icon: "📊",
-        label: "CTC Templates",
-      },
-      { to: "/admin/payroll/process", icon: "▶️", label: "Process Payroll" },
-      { to: "/admin/payroll/payslips", icon: "📄", label: "Payslips" },
-      { to: "/admin/payroll/advances", icon: "💳", label: "Advances" },
-      { to: "/admin/payroll/loans", icon: "🏦", label: "Loans" },
-    ],
-  },
 ];
 
 export default function AdminLayout() {
@@ -92,13 +77,13 @@ export default function AdminLayout() {
   return (
     <div className="layout">
       {/* Mobile Sidebar Overlay */}
-      <div 
-        className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`}
+      <div
+        className={`sidebar-overlay ${isSidebarOpen ? "open" : ""}`}
         onClick={closeSidebar}
       />
 
       {/* Sidebar */}
-      <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+      <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">🏢</div>
           <div>
@@ -150,14 +135,19 @@ export default function AdminLayout() {
       {/* Main */}
       <div className="main-content">
         <header className="topbar">
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button 
-              className="mobile-menu-btn" 
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <button
+              className="mobile-menu-btn"
               onClick={() => setIsSidebarOpen(true)}
             >
               ☰
             </button>
-            <div className="topbar-title">HR Management System</div>
+            <img
+              src="/Dayton.png"
+              alt="Dayton Logo"
+              style={{ height: "53px", width: "115px", objectFit: "contain" }} x
+            />
+            <span className="topbar-title">HR Management System</span>
           </div>
           <div className="topbar-actions">
             <div className="user-badge" id="user-badge">

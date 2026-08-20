@@ -50,13 +50,7 @@ import LeaveApprovalsPage from "./pages/admin/LeaveApprovalsPage";
 import ApplyOnBehalfPage from "./pages/admin/leave/ApplyOnBehalfPage";
 import LeaveCalendarPage from "./pages/admin/leave/LeaveCalendarPage";
 
-// Admin — Payroll
-import ProcessPayrollPage from "./pages/admin/ProcessPayrollPage";
-import SalaryHeadsPage from "./pages/admin/payroll/SalaryHeadsPage";
-import CtcTemplatesPage from "./pages/admin/payroll/CtcTemplatesPage";
-import PayslipsReviewPage from "./pages/admin/payroll/PayslipsReviewPage";
-import AdvancesPage from "./pages/admin/payroll/AdvancesPage";
-import LoansPage from "./pages/admin/payroll/LoansPage";
+
 
 // Self-Service
 import EssDashboard from "./pages/self-service/DashboardPage";
@@ -64,8 +58,7 @@ import EssProfilePage from "./pages/self-service/EssProfilePage";
 import EssAttendancePage from "./pages/self-service/EssAttendancePage";
 import EssLeavePage from "./pages/self-service/EssLeavePage";
 import EssHolidaysPage from "./pages/self-service/EssHolidaysPage";
-import EssPayslipsPage from "./pages/self-service/EssPayslipsPage";
-import EssLoansPage from "./pages/self-service/EssLoansPage";
+
 
 // Lazy placeholder for pages not yet implemented
 import LazyPage from "./components/LazyPage";
@@ -184,16 +177,7 @@ export default function App() {
             <Route path="leave/apply-behalf" element={<ApplyOnBehalfPage />} />
             <Route path="leave/calendar" element={<LeaveCalendarPage />} />
 
-            {/* Payroll */}
-            <Route path="payroll/salary-heads" element={<SalaryHeadsPage />} />
-            <Route
-              path="payroll/ctc-templates"
-              element={<CtcTemplatesPage />}
-            />
-            <Route path="payroll/process" element={<ProcessPayrollPage />} />
-            <Route path="payroll/payslips" element={<PayslipsReviewPage />} />
-            <Route path="payroll/advances" element={<AdvancesPage />} />
-            <Route path="payroll/loans" element={<LoansPage />} />
+
 
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
@@ -212,8 +196,7 @@ export default function App() {
             <Route path="attendance" element={<EssAttendancePage />} />
             <Route path="leave" element={<EssLeavePage />} />
             <Route path="holidays" element={<EssHolidaysPage />} />
-            <Route path="payslips" element={<EssPayslipsPage />} />
-            <Route path="loans" element={<EssLoansPage />} />
+
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 

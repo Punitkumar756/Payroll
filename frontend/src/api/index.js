@@ -148,46 +148,7 @@ export const leaveApi = {
   cancel: (id) => api.delete(`/leave/self/${id}/cancel`).then((r) => r.data),
 };
 
-// ── Payroll ───────────────────────────────────────────────────
-export const payrollApi = {
-  listSalaryHeads: () => api.get("/payroll/salary-heads").then((r) => r.data),
-  createSalaryHead: (data) =>
-    api.post("/payroll/salary-heads", data).then((r) => r.data),
-  updateSalaryHead: (id, data) =>
-    api.put(`/payroll/salary-heads/${id}`, data).then((r) => r.data),
-  listCTCTemplates: () => api.get("/payroll/ctc-templates").then((r) => r.data),
-  createCTCTemplate: (data) =>
-    api.post("/payroll/ctc-templates", data).then((r) => r.data),
-  runPayroll: (data) => api.post("/payroll/run", data).then((r) => r.data),
-  listPayslipsHR: (params) =>
-    api.get("/payroll/payslips", { params }).then((r) => r.data),
-  editPayslipLine: (id, data) =>
-    api.patch(`/payroll/payslips/${id}/line`, data).then((r) => r.data),
-  approvePayslips: (data) =>
-    api.post("/payroll/payslips/approve", data).then((r) => r.data),
-  listAdvances: (params) =>
-    api.get("/payroll/advances", { params }).then((r) => r.data),
-  createAdvance: (data) =>
-    api.post("/payroll/advances", data).then((r) => r.data),
-  listLoansHR: (params) =>
-    api.get("/payroll/loans", { params }).then((r) => r.data),
-  approveLoan: (id) =>
-    api.post(`/payroll/loans/${id}/approve`).then((r) => r.data),
-  // Self
-  getPayslips: (params) =>
-    api.get("/payroll/self/payslips", { params }).then((r) => r.data),
-  getPayslipLines: (id) =>
-    api.get(`/payroll/self/payslips/${id}/lines`).then((r) => r.data),
-  downloadPayslip: (id) =>
-    api
-      .get(`/payroll/self/payslips/${id}/pdf`, { responseType: "blob" })
-      .then((r) => r.data),
-  requestLoan: (data) =>
-    api.post("/payroll/self/loans", data).then((r) => r.data),
-  getLoans: () => api.get("/payroll/self/loans").then((r) => r.data),
-  getLoanSchedule: (id) =>
-    api.get(`/payroll/self/loans/${id}/schedule`).then((r) => r.data),
-};
+
 
 export const dashboardApi = {
   getMetrics: () => api.get("/dashboard/metrics").then((r) => r.data),

@@ -52,3 +52,5 @@ backend/update_auth_sp.js
 backend/update_schema.js
 backend/update_sp.js
 backend/create_dashboard_sp.js
+
+sql.txt
