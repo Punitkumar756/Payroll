@@ -32,6 +32,11 @@ fun ProfileScreen(
 ) {
     val uiState by profileViewModel.uiState.collectAsState()
 
+    // Re-fetch profile when screen is shown to ensure fresh data
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchProfile()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
