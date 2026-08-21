@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { dashboardApi, employeesApi, announcementsApi } from "../../api";
-import { Users, Building, ClipboardList, AlertCircle, IndianRupee, PieChart as PieChartIcon, Zap } from "lucide-react";
+import { Users, Building, ClipboardList, AlertCircle, PieChart as PieChartIcon, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
@@ -90,20 +90,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="card" style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Payroll Expense</p>
-              <h2 style={{ fontSize: '1.5rem', margin: 0 }}>₹{(Number(metrics?.total_payroll_expense) || 0).toLocaleString()}</h2>
-            </div>
-            <div style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#ca8a04', padding: '0.75rem', borderRadius: '12px' }}>
-              <IndianRupee size={20} />
-            </div>
-          </div>
-          <div style={{ marginTop: '0.75rem', fontSize: '0.85rem' }}>
-            <span className="text-muted">Total Paid</span>
-          </div>
-        </div>
+
 
         <div className="card" style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -143,9 +130,7 @@ export default function AdminDashboard() {
             <button className="btn" style={{ justifyContent: 'flex-start', background: 'var(--clr-bg-input)', border: '1px solid var(--clr-border)', padding: '1rem' }} onClick={() => navigate('/admin/employees/create')}>
               + Add New Employee
             </button>
-            <button className="btn" style={{ justifyContent: 'flex-start', background: 'var(--clr-bg-input)', border: '1px solid var(--clr-border)', padding: '1rem' }} onClick={() => navigate('/admin/payroll/process')}>
-              💸 Process Payroll
-            </button>
+
             <button className="btn" style={{ justifyContent: 'flex-start', background: 'var(--clr-bg-input)', border: '1px solid var(--clr-border)', padding: '1rem' }} onClick={() => navigate('/admin/leave/approvals')}>
               📝 Review Leaves
             </button>

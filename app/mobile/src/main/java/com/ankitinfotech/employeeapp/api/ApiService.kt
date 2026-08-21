@@ -43,6 +43,13 @@ data class FullEmployee(
     @SerializedName("calendar_id") val calendar_id: Int?
 )
 
+data class EmployeeDocument(
+    val id: Int,
+    @SerializedName(value = "document_name", alternate = ["documentName"]) val document_name: String?,
+    @SerializedName(value = "file_path", alternate = ["filePath"]) val file_path: String?,
+    @SerializedName(value = "uploaded_at", alternate = ["createdAt", "uploadedAt"]) val uploaded_at: String?
+)
+
 // ── Attendance ────────────────────────────────────────────────
 data class AttendanceRecord(
     @SerializedName(value = "date", alternate = ["attendance_date", "attendanceDate"]) val date: String?,
@@ -182,4 +189,7 @@ interface ApiService {
 
     @GET("masters/holidays")
     suspend fun getHolidays(): Response<Any>
+
+    @GET("documents/{employeeId}")
+    suspend fun getDocuments(@Path("employeeId") employeeId: Int): Response<List<EmployeeDocument>>
 }
