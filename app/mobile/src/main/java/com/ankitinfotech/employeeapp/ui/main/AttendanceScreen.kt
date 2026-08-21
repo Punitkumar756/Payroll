@@ -38,7 +38,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AttendanceScreen(viewModel: AttendanceViewModel) {
+fun AttendanceScreen(viewModel: AttendanceViewModel, onRequestCorrection: () -> Unit = {}) {
     val uiState by viewModel.uiState.collectAsState()
     var isRefreshing by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -69,7 +69,14 @@ fun AttendanceScreen(viewModel: AttendanceViewModel) {
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onRequestCorrection,
+                icon = { Icon(Icons.Filled.Edit, "Correction") },
+                text = { Text("Request Correction") }
+            )
+        }
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,

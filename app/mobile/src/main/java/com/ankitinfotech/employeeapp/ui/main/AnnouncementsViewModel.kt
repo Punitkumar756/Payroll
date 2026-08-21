@@ -27,9 +27,9 @@ class AnnouncementsViewModel(application: Application) : AndroidViewModel(applic
         _uiState.value = AnnouncementsUiState.Loading
         viewModelScope.launch {
             try {
-                val resp = apiService.getDashboardSummary()
+                val resp = apiService.getAnnouncements()
                 if (resp.isSuccessful && resp.body() != null) {
-                    _uiState.value = AnnouncementsUiState.Success(resp.body()!!.announcements ?: emptyList())
+                    _uiState.value = AnnouncementsUiState.Success(resp.body()!!)
                 } else {
                     _uiState.value = AnnouncementsUiState.Error("Failed to load announcements")
                 }

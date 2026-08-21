@@ -1,5 +1,7 @@
 package com.ankitinfotech.employeeapp.ui.main
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -27,6 +29,7 @@ import com.ankitinfotech.employeeapp.ui.components.SkeletonListItem
 import com.ankitinfotech.employeeapp.utils.formatIsoDate
 import com.ankitinfotech.employeeapp.utils.formatIsoTime
 import com.ankitinfotech.employeeapp.utils.toTitleCase
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -178,7 +181,12 @@ fun DashboardContent(
                 )
             }
         } else {
-            items(announcements.take(3)) { AnnouncementCard(it) }
+            item {
+                AutoSlidingCarousel(
+                    items = announcements,
+                    itemContent = { AnnouncementCard(it) }
+                )
+            }
         }
 
         // ── Upcoming Holidays ─────────────────────────────────────
@@ -205,9 +213,8 @@ fun DashboardContent(
                 )
             }
         } else {
-            // Show top 2 upcoming holidays on dashboard
-            items(holidays.take(2)) { holiday ->
-                HolidayDashboardCard(holiday)
+            item {
+                HolidayDashboardCard(holidays.first())
             }
         }
         item { Spacer(Modifier.height(16.dp)) }
@@ -296,12 +303,18 @@ private fun AttendanceSummaryCard(att: AttendanceRecord?) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                val statusColor = when (att?.status) {
-                    "Present" -> MaterialTheme.colorScheme.primary
+                val displayStatus = when {
+                    att?.status != null -> att.status
+                    att?.clock_out != null -> "Present"
+                    att?.clock_in != null -> "Working"
+                    else -> "Not marked"
+                }
+                val statusColor = when (displayStatus) {
+                    "Present", "Working" -> MaterialTheme.colorScheme.primary
                     "Absent"  -> MaterialTheme.colorScheme.error
                     else      -> MaterialTheme.colorScheme.onSurfaceVariant
                 }
-                Text(att?.status ?: "Not marked", fontWeight = FontWeight.Bold,
+                Text(displayStatus, fontWeight = FontWeight.Bold,
                     color = statusColor, style = MaterialTheme.typography.titleMedium)
                 if (att?.clock_in != null)
                     Text("In: ${formatIsoTime(att.clock_in)}", style = MaterialTheme.typography.bodySmall)
@@ -364,4 +377,36 @@ private fun SectionHeader(title: String, bottomPad: androidx.compose.ui.unit.Dp 
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(bottom = bottomPad)
     )
+}
+
+@Composable
+fun <T> AutoSlidingCarousel(
+    items: List<T>,
+    itemContent: @Composable (T) -> Unit
+) {
+    if (items.isEmpty()) return
+    if (items.size == 1) {
+        itemContent(items.first())
+        return
+    }
+
+    var currentIndex by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(items) {
+        while (true) {
+            delay(3500)
+            currentIndex = (currentIndex + 1) % items.size
+        }
+    }
+
+    AnimatedContent(
+        targetState = currentIndex,
+        transitionSpec = {
+            (slideInHorizontally(animationSpec = tween(500)) { width -> width } + fadeIn(animationSpec = tween(500))) togetherWith
+            (slideOutHorizontally(animationSpec = tween(500)) { width -> -width } + fadeOut(animationSpec = tween(500)))
+        },
+        label = "carousel"
+    ) { index ->
+        itemContent(items[index])
+    }
 }

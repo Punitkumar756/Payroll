@@ -12,7 +12,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 20,
   queueLimit: 0,
-  timezone: "+00:00",
+  timezone: "local",
 });
 
 export default pool;

@@ -207,6 +207,10 @@ export const requestCorrection = async (req, res, next) => {
   try {
     const { attendance_date, requested_check_in, requested_check_out, reason } =
       req.body;
+
+    const checkInDt = toDatetime(attendance_date, requested_check_in);
+    const checkOutDt = toDatetime(attendance_date, requested_check_out);
+
     res
       .status(201)
       .json(
@@ -215,8 +219,8 @@ export const requestCorrection = async (req, res, next) => {
           req.user.employeeId,
           req.user.userId,
           attendance_date ?? null,
-          requested_check_in ?? null,
-          requested_check_out ?? null,
+          checkInDt,
+          checkOutDt,
           reason ?? null,
         ]),
       );

@@ -32,6 +32,8 @@ sealed class Screen(
         Icons.Filled.Campaign, Icons.Outlined.Campaign, showInBar = false)
     object Holidays     : Screen("holidays",      "Holidays",
         Icons.Filled.Event,    Icons.Outlined.DateRange, showInBar = false)
+    object Correction   : Screen("correction",    "Correction",
+        Icons.Filled.Edit,     Icons.Outlined.Edit, showInBar = false)
 }
 
 private val bottomBarScreens = listOf(
@@ -53,6 +55,7 @@ fun MainScreen(loginViewModel: LoginViewModel) {
     val payrollViewModel:     PayrollViewModel     = viewModel()
     val announcementsViewModel: AnnouncementsViewModel = viewModel()
     val holidaysViewModel:    HolidaysViewModel    = viewModel()
+    val attendanceCorrectionViewModel: AttendanceCorrectionViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -87,7 +90,10 @@ fun MainScreen(loginViewModel: LoginViewModel) {
                 )
             }
             composable(Screen.Attendance.route) {
-                AttendanceScreen(attendanceViewModel)
+                AttendanceScreen(
+                    viewModel = attendanceViewModel,
+                    onRequestCorrection = { navController.navigate(Screen.Correction.route) }
+                )
             }
             composable(Screen.Leave.route) {
                 LeaveScreen(leaveViewModel)
@@ -110,6 +116,12 @@ fun MainScreen(loginViewModel: LoginViewModel) {
                     viewModel = holidaysViewModel
                 )
             }
+            composable(Screen.Correction.route) {
+                AttendanceCorrectionScreen(
+                    onBack = { navController.popBackStack() },
+                    viewModel = attendanceCorrectionViewModel
+                )
+            }
         }
     }
 }
@@ -122,6 +134,7 @@ private fun HrmsBottomBar(navController: NavHostController) {
     // Don't show the bar on sub-screens
     if (currentRoute == Screen.Announcements.route) return
     if (currentRoute == Screen.Holidays.route) return
+    if (currentRoute == Screen.Correction.route) return
 
     NavigationBar {
         bottomBarScreens.forEach { screen ->

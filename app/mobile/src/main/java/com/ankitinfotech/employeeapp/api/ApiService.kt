@@ -60,6 +60,13 @@ data class AttendanceRecord(
 )
 data class TimecardRequest(val type: String, val timestamp: String)
 
+data class CorrectionRequest(
+    val attendance_date: String,
+    val requested_check_in: String?,
+    val requested_check_out: String?,
+    val reason: String
+)
+
 // ── Leave ─────────────────────────────────────────────────────
 data class LeaveBalance(
     @SerializedName(value = "leave_type_id", alternate = ["leaveTypeId"]) val leave_type_id: Int,
@@ -157,11 +164,14 @@ interface ApiService {
     @GET("employees/{id}")
     suspend fun getEmployeeDetails(@Path("id") id: Int): Response<FullEmployee>
 
-    @GET("attendance/my")
+    @GET("attendance/self")
     suspend fun getMyAttendance(): Response<List<AttendanceRecord>>
 
     @POST("attendance/process-timecard")
     suspend fun processTimecard(@Body request: TimecardRequest): Response<Any>
+
+    @POST("attendance/self/correction")
+    suspend fun requestCorrection(@Body request: CorrectionRequest): Response<Any>
 
     @GET("leave/types")
     suspend fun getLeaveTypes(): Response<List<LeaveBalance>>
@@ -180,6 +190,9 @@ interface ApiService {
 
     @GET("dashboard/employee")
     suspend fun getDashboardSummary(): Response<DashboardSummary>
+    
+    @GET("masters/announcements")
+    suspend fun getAnnouncements(): Response<List<Announcement>>
 
     @GET("payroll/self/payslips")
     suspend fun getPayslips(): Response<List<Payslip>>
