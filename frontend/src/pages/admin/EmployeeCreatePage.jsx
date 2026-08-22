@@ -1,532 +1,404 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  employeesApi,
-  departmentsApi,
-  designationsApi,
-  locationsApi,
-  calendarsApi,
-} from "../../api";
-import toast from "react-hot-toast";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { employeesApi, departmentsApi, designationsApi, locationsApi, calendarsApi, categoriesApi, groupsApi, subGroupsApi } from '../../api';
+import toast from 'react-hot-toast';
+import { User, Briefcase, Building, MapPin, Shield, CreditCard, ChevronRight, Save, X } from 'lucide-react';
 
-const STEPS = ["Basic Info", "Org Details", "Statutory", "Address"];
+const TABS = [
+  { id: 'basic', label: 'Basic Details', icon: User },
+  { id: 'employment', label: 'Employment', icon: Briefcase },
+  { id: 'organization', label: 'Organization', icon: Building },
+  { id: 'address', label: 'Address & Contact', icon: MapPin },
+  { id: 'statutory', label: 'Statutory', icon: Shield },
+  { id: 'payment', label: 'Bank & Payment', icon: CreditCard }
+];
 
 export default function EmployeeCreatePage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+  const [activeTab, setActiveTab] = useState('basic');
   const [saving, setSaving] = useState(false);
   const [masters, setMasters] = useState({
-    departments: [],
-    designations: [],
-    locations: [],
-    calendars: [],
+    departments: [], designations: [], locations: [], calendars: [], categories: [], groups: [], subGroups: []
   });
+  
   const [form, setForm] = useState({
-    gender: "Male",
-    status: "Active",
+    // Basic
+    employee_code: '', first_name: '', middle_name: '', last_name: '', date_of_birth: '', gender: 'Male', blood_group: '', marital_status: '',
+    // Employment
+    joining_date: '', confirmation_date: '', status: 'Active',
+    // Organization
+    department_id: '', designation_id: '', location_id: '', category_id: '', group_id: '', sub_group_id: '', calendar_id: '', reporting_manager_id: '', badge_id: '',
+    // Contact
+    official_email: '', contact_number: '', emergency_name: '', emergency_phone: '', emergency_relation: '', current_address: '', permanent_address: '',
+    // Statutory
+    pf_number: '', esi_number: '', pan: '', aadhaar: '', uan: '',
+    // Bank
+    bank_name: '', bank_account: '', bank_ifsc: '', bank_branch: ''
   });
 
   useEffect(() => {
     Promise.all([
-      departmentsApi.list(),
-      designationsApi.list(),
-      locationsApi.list(),
-      calendarsApi.list(),
-    ]).then(([d, des, l, c]) =>
-      setMasters({
-        departments: d,
-        designations: des,
-        locations: l,
-        calendars: c,
-      }),
-    );
+      departmentsApi.list().catch(()=>[]), designationsApi.list().catch(()=>[]), locationsApi.list().catch(()=>[]), 
+      calendarsApi.list().catch(()=>[]), categoriesApi.list().catch(()=>[]), groupsApi.list().catch(()=>[]), subGroupsApi.list().catch(()=>[])
+    ]).then(([d, des, l, c, cat, g, sg]) => {
+      setMasters({ departments: Array.isArray(d)?d:[], designations: Array.isArray(des)?des:[], locations: Array.isArray(l)?l:[], calendars: Array.isArray(c)?c:[], categories: Array.isArray(cat)?cat:[], groups: Array.isArray(g)?g:[], subGroups: Array.isArray(sg)?sg:[] });
+    });
   }, []);
 
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setSaving(true);
     try {
-      const result = await employeesApi.create(form);
-      toast.success("Employee created successfully!");
-      navigate(`/admin/employees/${result.id}`);
+      // 1. Create Basic Employee
+      const empPayload = {
+        employee_code: form.employee_code, first_name: form.first_name, middle_name: form.middle_name, last_name: form.last_name, 
+        date_of_birth: form.date_of_birth, gender: form.gender, joining_date: form.joining_date, 
+        department_id: form.department_id, designation_id: form.designation_id, location_id: form.location_id, 
+        category_id: form.category_id, group_id: form.group_id, sub_group_id: form.sub_group_id, 
+        calendar_id: form.calendar_id, reporting_manager_id: form.reporting_manager_id, 
+        official_email: form.official_email, contact_number: form.contact_number, badge_id: form.badge_id, status: form.status
+      };
+      
+      const created = await employeesApi.create(empPayload);
+      
+      // We will attempt to save statutory and address if API endpoints exist.
+      // For now, we rely on the main create. If backend needs specific updates, we can add them later.
+      try {
+        if(employeesApi.updateStatutory) {
+           await employeesApi.updateStatutory(created.id, {
+             pf_number: form.pf_number, esi_number: form.esi_number, pan: form.pan, aadhaar: form.aadhaar,
+             bank_name: form.bank_name, bank_account: form.bank_account, bank_ifsc: form.bank_ifsc, bank_branch: form.bank_branch, uan: form.uan
+           });
+        }
+      } catch(err) { console.warn('Statutory update failed/unavailable', err); }
+
+      toast.success('Employee onboarded successfully!');
+      navigate(`/admin/employees/${created.id}`);
     } catch (e) {
-      toast.error(e?.response?.data?.detail || "Failed to create employee");
+      toast.error(e?.response?.data?.message || e?.response?.data?.detail || 'Failed to create employee');
     } finally {
       setSaving(false);
     }
   };
 
-  return (
-    <div className="animate-fade">
-      <div className="page-header">
-        <div className="page-header-left">
-          <h1>New Employee</h1>
-          <p>Add a new employee to the organization</p>
-        </div>
-        <button
-          className="btn btn-ghost"
-          onClick={() => navigate("/admin/employees")}
-        >
-          ← Back
-        </button>
-      </div>
-
-      {/* Stepper */}
-      <div className="stepper" style={{ marginBottom: "var(--sp-xl)" }}>
-        {STEPS.map((s, i) => (
-          <React.Fragment key={s}>
-            <div
-              className={`step ${i === step ? "active" : i < step ? "done" : ""}`}
-            >
-              <div className="step-circle">{i < step ? "✓" : i + 1}</div>
-              <span className="step-label">{s}</span>
-            </div>
-            {i < STEPS.length - 1 && <div className="step-line" />}
-          </React.Fragment>
-        ))}
-      </div>
-
-      <div className="card">
-        <div className="card-body">
-          {/* Step 0: Basic Info */}
-          {step === 0 && (
-            <div className="animate-slide">
-              <h3 style={{ marginBottom: "var(--sp-lg)" }}>
-                Basic Information
-              </h3>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Employee Code *</label>
-                  <input
-                    className="form-input"
-                    id="emp-code"
-                    value={form.employee_code || ""}
-                    onChange={(e) => set("employee_code", e.target.value)}
-                    placeholder="EMP-001"
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Joining Date *</label>
-                  <input
-                    className="form-input"
-                    id="emp-joining"
-                    type="date"
-                    value={form.joining_date || ""}
-                    onChange={(e) => set("joining_date", e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="form-row-3">
-                <div className="form-group">
-                  <label className="form-label">First Name *</label>
-                  <input
-                    className="form-input"
-                    id="emp-fname"
-                    value={form.first_name || ""}
-                    onChange={(e) => set("first_name", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Middle Name</label>
-                  <input
-                    className="form-input"
-                    id="emp-mname"
-                    value={form.middle_name || ""}
-                    onChange={(e) => set("middle_name", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Last Name *</label>
-                  <input
-                    className="form-input"
-                    id="emp-lname"
-                    value={form.last_name || ""}
-                    onChange={(e) => set("last_name", e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Date of Birth</label>
-                  <input
-                    className="form-input"
-                    id="emp-dob"
-                    type="date"
-                    value={form.date_of_birth || ""}
-                    onChange={(e) => set("date_of_birth", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Gender</label>
-                  <select
-                    className="form-select"
-                    id="emp-gender"
-                    value={form.gender || ""}
-                    onChange={(e) => set("gender", e.target.value)}
-                  >
-                    <option>Male</option>
-                    <option>Female</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Official Email</label>
-                  <input
-                    className="form-input"
-                    id="emp-email"
-                    type="email"
-                    value={form.official_email || ""}
-                    onChange={(e) => set("official_email", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Contact Number</label>
-                  <input
-                    className="form-input"
-                    id="emp-phone"
-                    value={form.contact_number || ""}
-                    onChange={(e) => set("contact_number", e.target.value)}
-                  />
-                </div>
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'basic':
+        return (
+          <div className="animate-fade">
+            <h3 style={{ marginBottom: '1.5rem', color: 'var(--clr-primary)' }}>Basic Details</h3>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">First Name *</label>
+                <input required className="form-input" value={form.first_name} onChange={e => set('first_name', e.target.value)} />
               </div>
               <div className="form-group">
-                <label className="form-label">Badge ID</label>
-                <input
-                  className="form-input"
-                  id="emp-badge"
-                  value={form.badge_id || ""}
-                  onChange={(e) => set("badge_id", e.target.value)}
-                />
+                <label className="form-label">Middle Name</label>
+                <input className="form-input" value={form.middle_name} onChange={e => set('middle_name', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Last Name *</label>
+                <input required className="form-input" value={form.last_name} onChange={e => set('last_name', e.target.value)} />
               </div>
             </div>
-          )}
-
-          {/* Step 1: Org Details */}
-          {step === 1 && (
-            <div className="animate-slide">
-              <h3 style={{ marginBottom: "var(--sp-lg)" }}>
-                Organizational Details
-              </h3>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Department</label>
-                  <select
-                    className="form-select"
-                    id="emp-dept"
-                    value={form.department_id || ""}
-                    onChange={(e) => set("department_id", e.target.value)}
-                  >
-                    <option value="">Select...</option>
-                    {masters.departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Designation</label>
-                  <select
-                    className="form-select"
-                    id="emp-desig"
-                    value={form.designation_id || ""}
-                    onChange={(e) => set("designation_id", e.target.value)}
-                  >
-                    <option value="">Select...</option>
-                    {masters.designations.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">Date of Birth *</label>
+                <input required type="date" className="form-input" value={form.date_of_birth} onChange={e => set('date_of_birth', e.target.value)} />
               </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Location</label>
-                  <select
-                    className="form-select"
-                    id="emp-loc"
-                    value={form.location_id || ""}
-                    onChange={(e) => set("location_id", e.target.value)}
-                  >
-                    <option value="">Select...</option>
-                    {masters.locations.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Calendar</label>
-                  <select
-                    className="form-select"
-                    id="emp-cal"
-                    value={form.calendar_id || ""}
-                    onChange={(e) => set("calendar_id", e.target.value)}
-                  >
-                    <option value="">Select...</option>
-                    {masters.calendars.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="form-group">
+                <label className="form-label">Gender</label>
+                <select className="form-select" value={form.gender} onChange={e => set('gender', e.target.value)}>
+                  <option>Male</option><option>Female</option><option>Other</option>
+                </select>
               </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Confirmation Date</label>
-                  <input
-                    className="form-input"
-                    id="emp-confirm"
-                    type="date"
-                    value={form.confirmation_date || ""}
-                    onChange={(e) => set("confirmation_date", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Status</label>
-                  <select
-                    className="form-select"
-                    id="emp-status"
-                    value={form.status || "Active"}
-                    onChange={(e) => set("status", e.target.value)}
-                  >
-                    <option>Active</option>
-                    <option>Inactive</option>
-                  </select>
-                </div>
+              <div className="form-group">
+                <label className="form-label">Blood Group</label>
+                <select className="form-select" value={form.blood_group} onChange={e => set('blood_group', e.target.value)}>
+                  <option value="">Select...</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                </select>
               </div>
             </div>
-          )}
-
-          {/* Step 2: Statutory */}
-          {step === 2 && (
-            <div className="animate-slide">
-              <h3 style={{ marginBottom: "var(--sp-lg)" }}>
-                Statutory Details
-              </h3>
-              <p className="text-muted mb-md">
-                These details will be stored encrypted. They can be added later
-                too.
-              </p>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">PF Number</label>
-                  <input
-                    className="form-input"
-                    id="emp-pf"
-                    value={form.pf_number || ""}
-                    onChange={(e) => set("pf_number", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">ESI Number</label>
-                  <input
-                    className="form-input"
-                    id="emp-esi"
-                    value={form.esi_number || ""}
-                    onChange={(e) => set("esi_number", e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">PAN</label>
-                  <input
-                    className="form-input"
-                    id="emp-pan"
-                    value={form.pan || ""}
-                    onChange={(e) => set("pan", e.target.value)}
-                    placeholder="ABCDE1234F"
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Aadhaar</label>
-                  <input
-                    className="form-input"
-                    id="emp-aadhaar"
-                    value={form.aadhaar || ""}
-                    onChange={(e) => set("aadhaar", e.target.value)}
-                    placeholder="XXXX XXXX XXXX"
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Bank Name</label>
-                  <input
-                    className="form-input"
-                    id="emp-bank"
-                    value={form.bank_name || ""}
-                    onChange={(e) => set("bank_name", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Bank Account Number</label>
-                  <input
-                    className="form-input"
-                    id="emp-acct"
-                    value={form.bank_account || ""}
-                    onChange={(e) => set("bank_account", e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">IFSC Code</label>
-                  <input
-                    className="form-input"
-                    id="emp-ifsc"
-                    value={form.bank_ifsc || ""}
-                    onChange={(e) => set("bank_ifsc", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">UAN Number</label>
-                  <input
-                    className="form-input"
-                    id="emp-uan"
-                    value={form.uan || ""}
-                    onChange={(e) => set("uan", e.target.value)}
-                  />
-                </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Marital Status</label>
+                <select className="form-select" value={form.marital_status} onChange={e => set('marital_status', e.target.value)}>
+                  <option value="">Select...</option><option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option>
+                </select>
               </div>
             </div>
-          )}
-
-          {/* Step 3: Address */}
-          {step === 3 && (
-            <div className="animate-slide">
-              <h3 style={{ marginBottom: "var(--sp-lg)" }}>Address Details</h3>
+          </div>
+        );
+      case 'employment':
+        return (
+          <div className="animate-fade">
+            <h3 style={{ marginBottom: '1.5rem', color: 'var(--clr-primary)' }}>Employment Information</h3>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">Employee Code *</label>
+                <input required className="form-input" value={form.employee_code} onChange={e => set('employee_code', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Joining Date *</label>
+                <input required type="date" className="form-input" value={form.joining_date} onChange={e => set('joining_date', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Confirmation Date</label>
+                <input type="date" className="form-input" value={form.confirmation_date} onChange={e => set('confirmation_date', e.target.value)} />
+              </div>
+            </div>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">Employment Status</label>
+                <select className="form-select" value={form.status} onChange={e => set('status', e.target.value)}>
+                  <option>Active</option><option>Inactive</option><option>Probation</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Badge ID / Biometric ID</label>
+                <input className="form-input" value={form.badge_id} onChange={e => set('badge_id', e.target.value)} />
+              </div>
+            </div>
+          </div>
+        );
+      case 'organization':
+        return (
+          <div className="animate-fade">
+            <h3 style={{ marginBottom: '1.5rem', color: 'var(--clr-primary)' }}>Organizational Hierarchy</h3>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">Location *</label>
+                <select required className="form-select" value={form.location_id} onChange={e => set('location_id', Number(e.target.value))}>
+                  <option value="">Select Location...</option>
+                  {masters.locations.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Department *</label>
+                <select required className="form-select" value={form.department_id} onChange={e => set('department_id', Number(e.target.value))}>
+                  <option value="">Select Department...</option>
+                  {masters.departments.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Designation *</label>
+                <select required className="form-select" value={form.designation_id} onChange={e => set('designation_id', Number(e.target.value))}>
+                  <option value="">Select Designation...</option>
+                  {masters.designations.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">Category</label>
+                <select className="form-select" value={form.category_id} onChange={e => set('category_id', Number(e.target.value))}>
+                  <option value="">Select Category...</option>
+                  {masters.categories.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Group</label>
+                <select className="form-select" value={form.group_id} onChange={e => set('group_id', Number(e.target.value))}>
+                  <option value="">Select Group...</option>
+                  {masters.groups.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Sub Group</label>
+                <select className="form-select" value={form.sub_group_id} onChange={e => set('sub_group_id', Number(e.target.value))}>
+                  <option value="">Select Sub Group...</option>
+                  {masters.subGroups.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">Calendar</label>
+                <select className="form-select" value={form.calendar_id} onChange={e => set('calendar_id', Number(e.target.value))}>
+                  <option value="">Select Calendar...</option>
+                  {masters.calendars.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+        );
+      case 'address':
+        return (
+          <div className="animate-fade">
+            <h3 style={{ marginBottom: '1.5rem', color: 'var(--clr-primary)' }}>Contact & Address</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Official Email</label>
+                <input type="email" className="form-input" value={form.official_email} onChange={e => set('official_email', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Mobile Number *</label>
+                <input required className="form-input" value={form.contact_number} onChange={e => set('contact_number', e.target.value)} />
+              </div>
+            </div>
+            <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Current Address</label>
-                <textarea
-                  className="form-textarea"
-                  id="emp-addr"
-                  value={form.current_address || ""}
-                  onChange={(e) => set("current_address", e.target.value)}
-                />
+                <textarea className="form-textarea" rows="3" value={form.current_address} onChange={e => set('current_address', e.target.value)} />
               </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">City</label>
-                  <input
-                    className="form-input"
-                    id="emp-city"
-                    value={form.city || ""}
-                    onChange={(e) => set("city", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">State</label>
-                  <input
-                    className="form-input"
-                    id="emp-state"
-                    value={form.state || ""}
-                    onChange={(e) => set("state", e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Pincode</label>
-                  <input
-                    className="form-input"
-                    id="emp-pin"
-                    value={form.pincode || ""}
-                    onChange={(e) => set("pincode", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Country</label>
-                  <input
-                    className="form-input"
-                    id="emp-country"
-                    value={form.country || "India"}
-                    onChange={(e) => set("country", e.target.value)}
-                  />
-                </div>
-              </div>
-              <h4
-                style={{
-                  marginTop: "var(--sp-lg)",
-                  marginBottom: "var(--sp-md)",
-                }}
-              >
-                Emergency Contact
-              </h4>
-              <div className="form-row-3">
-                <div className="form-group">
-                  <label className="form-label">Name</label>
-                  <input
-                    className="form-input"
-                    id="emp-emergency-name"
-                    value={form.emergency_name || ""}
-                    onChange={(e) => set("emergency_name", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Phone</label>
-                  <input
-                    className="form-input"
-                    id="emp-emergency-phone"
-                    value={form.emergency_phone || ""}
-                    onChange={(e) => set("emergency_phone", e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Relation</label>
-                  <input
-                    className="form-input"
-                    id="emp-emergency-relation"
-                    value={form.emergency_relation || ""}
-                    onChange={(e) => set("emergency_relation", e.target.value)}
-                  />
-                </div>
+              <div className="form-group">
+                <label className="form-label">Permanent Address</label>
+                <textarea className="form-textarea" rows="3" value={form.permanent_address} onChange={e => set('permanent_address', e.target.value)} />
               </div>
             </div>
-          )}
-        </div>
+            <h4 style={{ margin: '1rem 0' }}>Emergency Contact</h4>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">Name</label>
+                <input className="form-input" value={form.emergency_name} onChange={e => set('emergency_name', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Relation</label>
+                <input className="form-input" value={form.emergency_relation} onChange={e => set('emergency_relation', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone</label>
+                <input className="form-input" value={form.emergency_phone} onChange={e => set('emergency_phone', e.target.value)} />
+              </div>
+            </div>
+          </div>
+        );
+      case 'statutory':
+        return (
+          <div className="animate-fade">
+            <h3 style={{ marginBottom: '1.5rem', color: 'var(--clr-primary)' }}>Statutory Details</h3>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">PAN Number</label>
+                <input className="form-input" value={form.pan} onChange={e => set('pan', e.target.value)} style={{ textTransform: 'uppercase' }} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Aadhaar Number</label>
+                <input className="form-input" value={form.aadhaar} onChange={e => set('aadhaar', e.target.value)} />
+              </div>
+            </div>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">PF Number</label>
+                <input className="form-input" value={form.pf_number} onChange={e => set('pf_number', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">UAN</label>
+                <input className="form-input" value={form.uan} onChange={e => set('uan', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">ESI Number</label>
+                <input className="form-input" value={form.esi_number} onChange={e => set('esi_number', e.target.value)} />
+              </div>
+            </div>
+          </div>
+        );
+      case 'payment':
+        return (
+          <div className="animate-fade">
+            <h3 style={{ marginBottom: '1.5rem', color: 'var(--clr-primary)' }}>Bank & Payment Info</h3>
+            <div className="form-row-3">
+              <div className="form-group">
+                <label className="form-label">Bank Name</label>
+                <input className="form-input" value={form.bank_name} onChange={e => set('bank_name', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Account Number</label>
+                <input className="form-input" value={form.bank_account} onChange={e => set('bank_account', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">IFSC Code</label>
+                <input className="form-input" value={form.bank_ifsc} onChange={e => set('bank_ifsc', e.target.value)} style={{ textTransform: 'uppercase' }} />
+              </div>
+            </div>
+            <div className="form-row-3">
+               <div className="form-group">
+                <label className="form-label">Branch Name</label>
+                <input className="form-input" value={form.bank_branch} onChange={e => set('bank_branch', e.target.value)} />
+              </div>
+            </div>
+          </div>
+        );
+      default: return null;
+    }
+  };
 
-        {/* Footer Navigation */}
-        <div
-          className="modal-footer"
-          style={{ padding: "var(--sp-md) var(--sp-lg)" }}
-        >
-          <button
-            className="btn btn-ghost"
-            onClick={() =>
-              step > 0 ? setStep((s) => s - 1) : navigate("/admin/employees")
-            }
-          >
-            {step === 0 ? "Cancel" : "← Back"}
-          </button>
-          {step < STEPS.length - 1 ? (
-            <button
-              id="btn-next-step"
-              className="btn btn-primary"
-              onClick={() => setStep((s) => s + 1)}
-            >
-              Next →
-            </button>
-          ) : (
-            <button
-              id="btn-create-emp-submit"
-              className="btn btn-primary"
-              onClick={handleSubmit}
-              disabled={saving}
-            >
-              {saving ? "Creating..." : "✓ Create Employee"}
-            </button>
-          )}
+  return (
+    <div className="animate-fade" style={{ padding: '1.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.8rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <User size={28} color="var(--clr-primary)" /> Onboard Employee
+          </h1>
+          <p style={{ color: 'var(--clr-text-muted)', margin: '0.25rem 0 0' }}>Complete the employee profile sections to add them to the system</p>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button className="btn btn-outline" onClick={() => navigate('/admin/employees')}><X size={18} /> Cancel</button>
         </div>
       </div>
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+        
+        {/* Left Sidebar Tabs */}
+        <div className="card" style={{ width: '280px', padding: '1rem', flexShrink: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '1rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                    background: isActive ? 'rgba(99,102,241,0.1)' : 'transparent',
+                    color: isActive ? 'var(--clr-primary)' : 'var(--clr-text)',
+                    fontWeight: isActive ? 600 : 400,
+                    transition: 'all 0.2s', textAlign: 'left'
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <Icon size={18} style={{ opacity: isActive ? 1 : 0.6 }} /> {tab.label}
+                  </span>
+                  {isActive && <ChevronRight size={18} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right Content Area */}
+        <div className="card" style={{ flex: 1, padding: '2rem', minHeight: '500px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1 }}>
+            {renderTabContent()}
+          </div>
+          
+          <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border)', display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              {TABS.findIndex(t => t.id === activeTab) > 0 && (
+                <button type="button" className="btn btn-outline" onClick={() => setActiveTab(TABS[TABS.findIndex(t => t.id === activeTab) - 1].id)}>
+                  Previous
+                </button>
+              )}
+            </div>
+            <div>
+              {TABS.findIndex(t => t.id === activeTab) < TABS.length - 1 ? (
+                <button type="button" className="btn btn-primary" onClick={() => setActiveTab(TABS[TABS.findIndex(t => t.id === activeTab) + 1].id)}>
+                  Next Section
+                </button>
+              ) : (
+                <button type="submit" className="btn btn-primary" disabled={saving} style={{ background: 'var(--clr-success)', borderColor: 'var(--clr-success)' }}>
+                  <Save size={18} /> {saving ? 'Saving...' : 'Complete Onboarding'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

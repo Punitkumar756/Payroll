@@ -22,12 +22,25 @@ export const designationsApi = makeCRUD("/masters/designations");
 export const categoriesApi = makeCRUD("/masters/categories");
 export const groupsApi = makeCRUD("/masters/groups");
 export const subGroupsApi = makeCRUD("/masters/sub-groups");
+
+export const bulkImportApi = {
+  upload: (entity, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post(`/masters/import/${entity}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data);
+  }
+};
+
 // calendarsApi and holidaysApi are replaced by the detailed calendars module API below
 export const announcementsApi = {
   list: (params) =>
     api.get("/masters/announcements", { params }).then((r) => r.data),
   create: (data) =>
     api.post("/masters/announcements", data).then((r) => r.data),
+  update: (id, data) => 
+    api.put(`/masters/announcements/${id}`, data).then((r) => r.data),
 };
 
 export const holidaysApi = {
@@ -109,6 +122,13 @@ export const attendanceApi = {
     api.post("/attendance/process-timecard", data).then((r) => r.data),
   manualUpdate: (data) =>
     api.post("/attendance/manual-update", data).then((r) => r.data),
+  bulkManualUpdate: (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post("/attendance/manual-update/bulk", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data);
+  },
   lockPeriod: (data) => api.post("/attendance/lock", data).then((r) => r.data),
   listCorrections: (params) =>
     api.get("/attendance/corrections", { params }).then((r) => r.data),

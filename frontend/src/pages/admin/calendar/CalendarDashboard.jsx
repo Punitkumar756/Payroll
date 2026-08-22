@@ -75,6 +75,7 @@ export default function CalendarDashboard() {
             <table className="table">
               <thead>
                 <tr>
+                  <th>S. No.</th>
                   <th>Code</th>
                   <th>Name</th>
                   <th>Year</th>
@@ -85,8 +86,9 @@ export default function CalendarDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {calendars.map((cal) => (
+                {calendars.map((cal, index) => (
                   <tr key={cal.id}>
+                    <td>{index + 1}</td>
                     <td><span className="badge badge-gray">{cal.calendar_code}</span></td>
                     <td style={{ fontWeight: 500 }}>{cal.calendar_name}</td>
                     <td>{cal.year}</td>
@@ -111,7 +113,7 @@ export default function CalendarDashboard() {
                 ))}
                 {calendars.length === 0 && (
                   <tr>
-                    <td colSpan="7" style={{ textAlign: "center", padding: "2rem", color: "var(--clr-text-muted)" }}>
+                    <td colSpan="8" style={{ textAlign: "center", padding: "2rem", color: "var(--clr-text-muted)" }}>
                       No calendars found.
                     </td>
                   </tr>

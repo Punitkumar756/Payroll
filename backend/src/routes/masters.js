@@ -1,12 +1,17 @@
 import { Router } from "express";
+import multer from "multer";
 import { authenticate } from "../middleware/authenticate.js";
 import { requireRole } from "../middleware/requireRole.js";
 import * as c from "../controllers/mastersController.js";
 
 const router = Router();
+const upload = multer({ dest: 'uploads/temp/' });
 
 // All master routes require authentication; most require HR role
 router.use(authenticate);
+
+// Bulk Import
+router.post("/import/:entity", requireRole("HR"), upload.single("file"), c.importCSV);
 
 // Locations
 router.get("/locations", c.listLocations);
@@ -54,5 +59,6 @@ router.post("/holidays", requireRole("HR"), c.createHoliday);
 // Announcements
 router.get("/announcements", c.listAnnouncements);
 router.post("/announcements", requireRole("HR"), c.createAnnouncement);
+router.put("/announcements/:id", requireRole("HR"), c.updateAnnouncement);
 
 export default router;
