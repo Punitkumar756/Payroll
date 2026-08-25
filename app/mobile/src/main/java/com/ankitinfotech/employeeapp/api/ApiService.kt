@@ -43,6 +43,13 @@ data class FullEmployee(
     @SerializedName("calendar_id") val calendar_id: Int?
 )
 
+data class EmployeeDocument(
+    val id: Int,
+    @SerializedName(value = "document_name", alternate = ["documentName"]) val document_name: String?,
+    @SerializedName(value = "file_path", alternate = ["filePath"]) val file_path: String?,
+    @SerializedName(value = "uploaded_at", alternate = ["createdAt", "uploadedAt"]) val uploaded_at: String?
+)
+
 // ── Attendance ────────────────────────────────────────────────
 data class AttendanceRecord(
     @SerializedName(value = "date", alternate = ["attendance_date", "attendanceDate"]) val date: String?,
@@ -52,6 +59,13 @@ data class AttendanceRecord(
     @SerializedName(value = "work_hours", alternate = ["workHours", "hours", "total_hours"]) val work_hours: Double?
 )
 data class TimecardRequest(val type: String, val timestamp: String)
+
+data class CorrectionRequest(
+    val attendance_date: String,
+    val requested_check_in: String?,
+    val requested_check_out: String?,
+    val reason: String
+)
 
 // ── Leave ─────────────────────────────────────────────────────
 data class LeaveBalance(
@@ -150,11 +164,14 @@ interface ApiService {
     @GET("employees/{id}")
     suspend fun getEmployeeDetails(@Path("id") id: Int): Response<FullEmployee>
 
-    @GET("attendance/my")
+    @GET("attendance/self")
     suspend fun getMyAttendance(): Response<List<AttendanceRecord>>
 
     @POST("attendance/process-timecard")
     suspend fun processTimecard(@Body request: TimecardRequest): Response<Any>
+
+    @POST("attendance/self/correction")
+    suspend fun requestCorrection(@Body request: CorrectionRequest): Response<Any>
 
     @GET("leave/types")
     suspend fun getLeaveTypes(): Response<List<LeaveBalance>>
@@ -173,6 +190,9 @@ interface ApiService {
 
     @GET("dashboard/employee")
     suspend fun getDashboardSummary(): Response<DashboardSummary>
+    
+    @GET("masters/announcements")
+    suspend fun getAnnouncements(): Response<List<Announcement>>
 
     @GET("payroll/self/payslips")
     suspend fun getPayslips(): Response<List<Payslip>>
@@ -182,4 +202,7 @@ interface ApiService {
 
     @GET("masters/holidays")
     suspend fun getHolidays(): Response<Any>
+
+    @GET("documents/{employeeId}")
+    suspend fun getDocuments(@Path("employeeId") employeeId: Int): Response<List<EmployeeDocument>>
 }

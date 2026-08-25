@@ -1,6 +1,7 @@
 package com.ankitinfotech.employeeapp.ui.main
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -178,6 +179,76 @@ fun ProfileScreen(
                             ProfileRow(Icons.Filled.Receipt, "PF Number", emp.pf_number ?: "N/A")
                             ProfileRow(Icons.Filled.HealthAndSafety, "ESI Number", emp.esi_number ?: "N/A")
                             ProfileRow(Icons.Filled.Tag, "UAN", emp.uan_number ?: "N/A")
+                        }
+
+                        // ── Documents ─────────────────────────────────
+                        ProfileCard(title = "My Documents") {
+                            if (state.documents.isEmpty()) {
+                                Text("No documents uploaded yet.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            } else {
+                                val context = androidx.compose.ui.platform.LocalContext.current
+                                state.documents.forEach { doc ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 8.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                            .clickable {
+                                                if (doc.file_path != null) {
+                                                    // File path might be relative, ensure we have a full URL
+                                                    var url = doc.file_path
+                                                    if (!url.startsWith("http")) {
+                                                        val baseUrl = "http://192.168.0.187:5000/" // Using local IP
+                                                        url = baseUrl + url
+                                                    }
+                                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
+                                                    intent.data = android.net.Uri.parse(url)
+                                                    try {
+                                                        context.startActivity(intent)
+                                                    } catch (e: Exception) {
+                                                        android.widget.Toast.makeText(context, "Cannot open link", android.widget.Toast.LENGTH_SHORT).show()
+                                                    }
+                                                }
+                                            }
+                                            .padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.Description,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(Modifier.width(12.dp))
+                                        Column {
+                                            Text(
+                                                text = doc.document_name ?: "Unknown Document",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            if (doc.uploaded_at != null) {
+                                                Text(
+                                                    text = "Uploaded on " + formatIsoDate(doc.uploaded_at),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                        Spacer(Modifier.weight(1f))
+                                        Icon(
+                                            Icons.Filled.OpenInNew,
+                                            contentDescription = "Open Document",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
 
                         // ── Logout ────────────────────────────────────

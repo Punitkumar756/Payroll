@@ -57,6 +57,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 if (response.isSuccessful && response.body() != null) {
                     val body = response.body()!!
                     body.accessToken?.let { tokenManager.saveToken(it) }
+                    body.refreshToken?.let { tokenManager.saveRefreshToken(it) }
                     body.user?.let { user ->
                         // If employeeId is missing, fallback to userId
                         val idToSave = user.employeeId ?: user.userId

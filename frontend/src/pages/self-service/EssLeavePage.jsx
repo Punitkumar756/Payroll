@@ -132,21 +132,22 @@ export default function EssLeavePage() {
       </div>
 
       <div
+        className="grid-2"
         style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 350px",
           gap: "var(--sp-lg)",
           alignItems: "start",
         }}
       >
         <div className="card">
-          <table className="table">
+          <div className="table-responsive">
+            <table className="table">
             <thead>
               <tr>
                 <th>Leave Type</th>
                 <th>Dates</th>
                 <th>Days</th>
                 <th>Status</th>
+                <th>HR Remarks</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -166,6 +167,11 @@ export default function EssLeavePage() {
                     </span>
                   </td>
                   <td>
+                    <span style={{ fontSize: "0.85rem", color: "var(--clr-text-muted)" }}>
+                      {a.approver_remarks || "—"}
+                    </span>
+                  </td>
+                  <td>
                     {a.status === "Pending" && (
                       <button
                         className="btn btn-secondary"
@@ -180,13 +186,14 @@ export default function EssLeavePage() {
               ))}
               {applications.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center text-muted">
+                  <td colSpan={6} className="text-center text-muted">
                     No leave applications found.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
         <div className="card" style={{ padding: "var(--sp-md)" }}>

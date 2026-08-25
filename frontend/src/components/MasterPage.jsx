@@ -13,8 +13,9 @@ export default function MasterPage({
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState(null);
+  
+  const [editingRowId, setEditingRowId] = useState(null);
+  const [isAddingNew, setIsAddingNew] = useState(false);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
 
@@ -33,29 +34,54 @@ export default function MasterPage({
     load();
   }, []);
 
-  const openCreate = () => {
-    setEditing(null);
+  const handleAddNew = () => {
+    if (isAddingNew) {
+      setIsAddingNew(false);
+      setForm({});
+    } else {
+      setForm({});
+      setIsAddingNew(true);
+      setEditingRowId(null);
+    }
+  };
+
+  const handleEdit = (row) => {
+    if (editingRowId === row[idKey]) {
+      setEditingRowId(null);
+      setForm({});
+    } else {
+      setForm({ ...row });
+      setEditingRowId(row[idKey]);
+      setIsAddingNew(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingRowId(null);
+    setIsAddingNew(false);
     setForm({});
-    setShowModal(true);
   };
 
-  const openEdit = (row) => {
-    setEditing(row);
-    setForm({ ...row });
-    setShowModal(true);
-  };
-
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const cleanForm = { ...form };
+    for (const key in cleanForm) {
+      if (cleanForm[key] === "") {
+        cleanForm[key] = null;
+      }
+    }
+    
     setSaving(true);
     try {
-      if (editing) {
-        await api.update(editing[idKey], form);
+      if (editingRowId) {
+        await api.update(editingRowId, cleanForm);
         toast.success(`${title} updated`);
       } else {
-        await api.create(form);
+        await api.create(cleanForm);
         toast.success(`${title} created`);
       }
-      setShowModal(false);
+      setEditingRowId(null);
+      setIsAddingNew(false);
       await load();
     } catch (e) {
       toast.error(e?.response?.data?.detail || "Save failed");
@@ -84,227 +110,167 @@ export default function MasterPage({
     ),
   );
 
+  const formRowJsx = (
+    <tr>
+      <td colSpan={columns.length + 2} style={{ padding: "1.5rem", background: "rgba(99,102,241,0.04)", borderBottom: "1px solid var(--clr-border)" }}>
+        <form onSubmit={handleSave} className="animate-fade">
+          <h4 style={{ margin: "0 0 1.25rem", color: "var(--clr-primary)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            {editingRowId ? `✏️ Edit ${title}` : `✨ New ${title}`}
+          </h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1rem" }}>
+            {fields.map((f) => (
+              <div className="form-group" key={f.key}>
+                <label>
+                  {f.label}
+                  {f.required && " *"}
+                </label>
+                {f.type === "select" ? (
+                  <select
+                    className="form-input"
+                    value={form[f.key] ?? ""}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, [f.key]: e.target.value }))
+                    }
+                    required={f.required}
+                  >
+                    <option value="">Select...</option>
+                    {f.options?.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : f.type === "textarea" ? (
+                  <textarea
+                    className="form-input"
+                    value={form[f.key] ?? ""}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, [f.key]: e.target.value }))
+                    }
+                    required={f.required}
+                    rows="1"
+                  />
+                ) : f.type === "checkbox" ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
+                    <input
+                      type="checkbox"
+                      checked={form[f.key] === 1 || form[f.key] === true}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, [f.key]: e.target.checked }))
+                      }
+                      style={{ width: "auto" }}
+                    />
+                    <span style={{ fontSize: "0.9rem" }}>Yes</span>
+                  </div>
+                ) : (
+                  <input
+                    type={f.type || "text"}
+                    className="form-input"
+                    value={form[f.key] ?? ""}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, [f.key]: e.target.value }))
+                    }
+                    required={f.required}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+            <button type="button" className="btn btn-outline" onClick={handleCancel}>Cancel</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? "Saving..." : editingRowId ? "Update" : "Create"}
+            </button>
+          </div>
+        </form>
+      </td>
+    </tr>
+  );
+
   return (
-    <div className="animate-fade">
-      <div className="page-header">
-        <div className="page-header-left">
-          <h1>{title}</h1>
-          <p>{description}</p>
+    <div className="animate-fade" style={{ padding: "1.5rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
+        <div>
+          <h1 style={{ fontSize: "1.8rem", margin: 0 }}>{title}</h1>
+          <p style={{ color: "var(--clr-text-muted)", margin: "0.25rem 0 0" }}>{description}</p>
         </div>
         <button
-          id={`btn-create-${title.toLowerCase().replace(/\s/g, "-")}`}
           className="btn btn-primary"
-          onClick={openCreate}
+          onClick={handleAddNew}
         >
-          + New {title}
+          {isAddingNew ? "✕ Cancel" : `+ Add ${title}`}
         </button>
       </div>
 
-      <div className="card">
-        <div className="card-header">
-          <div
-            className="filter-bar"
-            style={{ margin: 0, flex: 1, gap: "var(--sp-sm)" }}
-          >
-            <div className="search-input-wrap">
-              <span className="search-icon">🔍</span>
-              <input
-                id={`search-${title.toLowerCase().replace(/\s/g, "-")}`}
-                className="search-input"
-                placeholder={`Search ${title.toLowerCase()}...`}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            {extraFilters}
-          </div>
-          <span
-            className="badge badge-gray"
-            style={{ marginLeft: "var(--sp-md)" }}
-          >
-            {filtered.length} records
-          </span>
+      <div className="card" style={{ padding: "1.5rem" }}>
+        <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem" }}>
+          <input 
+            className="form-input" 
+            placeholder={`🔍 Search ${title.toLowerCase()}...`}
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            style={{ maxWidth: "360px" }} 
+          />
+          {extraFilters}
         </div>
-
-        <div
-          className="table-wrapper"
-          style={{ border: "none", borderRadius: 0 }}
-        >
-          {loading ? (
-            <div className="loading-overlay">
-              <div className="spinner" />
-              <span>Loading...</span>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-icon">📋</div>
-              <p>No {title.toLowerCase()} found.</p>
-            </div>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  {columns.map((c) => (
-                    <th key={c.key}>{c.label}</th>
-                  ))}
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((row) => (
-                  <tr key={row[idKey]}>
-                    {columns.map((c) => (
-                      <td key={c.key}>
-                        {c.render ? c.render(row) : String(row[c.key] ?? "—")}
-                      </td>
-                    ))}
-                    <td>
-                      <div style={{ display: "flex", gap: "var(--sp-xs)" }}>
-                        <button
-                          id={`btn-edit-${title.toLowerCase().replace(/\s/g, "-")}-${row[idKey]}`}
-                          className="btn btn-ghost btn-sm"
-                          onClick={() => openEdit(row)}
-                        >
-                          ✏️ Edit
-                        </button>
-                        {api.remove && (
-                          <button
-                            id={`btn-delete-${title.toLowerCase().replace(/\s/g, "-")}-${row[idKey]}`}
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDelete(row)}
-                          >
-                            🗑️
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+        <div className="table-responsive">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>S. No.</th>
+                {columns.map((c) => (
+                  <th key={c.key}>{c.label}</th>
                 ))}
-              </tbody>
-            </table>
-          )}
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={columns.length + 2} style={{ textAlign: "center", padding: "2rem" }}>Loading...</td></tr>
+              ) : filtered.length === 0 && !isAddingNew ? (
+                <tr><td colSpan={columns.length + 2} style={{ textAlign: "center", padding: "2rem" }}>No {title.toLowerCase()} found.</td></tr>
+              ) : (
+                <>
+                  {isAddingNew && formRowJsx}
+                  {filtered.map((row, index) => (
+                    <React.Fragment key={row[idKey]}>
+                      <tr style={editingRowId === row[idKey] ? { background: "var(--clr-bg)" } : {}}>
+                        <td>{index + 1}</td>
+                        {columns.map((c) => (
+                          <td key={c.key}>
+                            {c.render ? c.render(row) : String(row[c.key] ?? "—")}
+                          </td>
+                        ))}
+                        <td>
+                          <div style={{ display: "flex", gap: "0.5rem" }}>
+                            <button
+                              className="btn btn-outline"
+                              style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem" }}
+                              onClick={() => handleEdit(row)}
+                            >
+                              {editingRowId === row[idKey] ? "Cancel Edit" : "Edit"}
+                            </button>
+                            {api.remove && (
+                              <button
+                                className="btn btn-outline"
+                                style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem", color: "var(--clr-danger)" }}
+                                onClick={() => handleDelete(row)}
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                      {editingRowId === row[idKey] && formRowJsx}
+                    </React.Fragment>
+                  ))}
+                </>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div
-          className="modal-overlay"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowModal(false);
-          }}
-        >
-          <div className="modal">
-            <div className="modal-header">
-              <h3 className="modal-title">
-                {editing ? `Edit ${title}` : `New ${title}`}
-              </h3>
-              <button
-                className="btn btn-ghost btn-icon"
-                onClick={() => setShowModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const cleanForm = { ...form };
-                for (const key in cleanForm) {
-                  if (cleanForm[key] === "") {
-                    cleanForm[key] = null;
-                  }
-                }
-                
-                setSaving(true);
-                const apiCall = editing
-                  ? api.update(editing[idKey], cleanForm)
-                  : api.create(cleanForm);
-
-                apiCall
-                  .then(() => {
-                    toast.success(`${title} ${editing ? "updated" : "created"}`);
-                    setShowModal(false);
-                    load();
-                  })
-                  .catch((err) => {
-                    toast.error(err?.response?.data?.detail || "Save failed");
-                  })
-                  .finally(() => {
-                    setSaving(false);
-                  });
-              }}
-            >
-              <div className="modal-body">
-                {fields.map((f) => (
-                  <div className="form-group" key={f.key}>
-                    <label className="form-label" htmlFor={`field-${f.key}`}>
-                      {f.label}
-                      {f.required && " *"}
-                    </label>
-                    {f.type === "select" ? (
-                      <select
-                        id={`field-${f.key}`}
-                        className="form-select"
-                        value={form[f.key] ?? ""}
-                        onChange={(e) =>
-                          setForm((p) => ({ ...p, [f.key]: e.target.value }))
-                        }
-                        required={f.required}
-                      >
-                        <option value="">Select...</option>
-                        {f.options?.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
-                    ) : f.type === "textarea" ? (
-                      <textarea
-                        id={`field-${f.key}`}
-                        className="form-textarea"
-                        value={form[f.key] ?? ""}
-                        onChange={(e) =>
-                          setForm((p) => ({ ...p, [f.key]: e.target.value }))
-                        }
-                        required={f.required}
-                      />
-                    ) : (
-                      <input
-                        id={`field-${f.key}`}
-                        type={f.type || "text"}
-                        className="form-input"
-                        value={form[f.key] ?? ""}
-                        onChange={(e) =>
-                          setForm((p) => ({ ...p, [f.key]: e.target.value }))
-                        }
-                        required={f.required}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  id="btn-save-modal"
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : editing ? "Update" : "Create"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

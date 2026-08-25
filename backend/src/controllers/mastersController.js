@@ -1,3 +1,5 @@
+import fs from "fs";
+import csv from "csv-parser";
 import { callSP, callSPOne, q } from "../db/callProcedure.js";
 
 // ── LOCATIONS ─────────────────────────────────────────────────
@@ -12,7 +14,7 @@ export const listLocations = async (req, res, next) => {
 
 export const createLocation = async (req, res, next) => {
   try {
-    const { code, name, address, phone, fax, website } = req.body;
+    const { code, name, address, phone, fax, website, remark, details } = req.body;
     const result = await callSPOne("sp_master_location_create", [
       req.user.role,
       req.user.userId,
@@ -22,6 +24,8 @@ export const createLocation = async (req, res, next) => {
       phone ?? null,
       fax ?? null,
       website ?? null,
+      remark ?? null,
+      details ?? null,
     ]);
     res.status(201).json(result);
   } catch (e) {
@@ -31,7 +35,7 @@ export const createLocation = async (req, res, next) => {
 
 export const updateLocation = async (req, res, next) => {
   try {
-    const { code, name, address, phone, fax, website, is_active } = req.body;
+    const { code, name, address, phone, fax, website, remark, details, is_active } = req.body;
     const result = await callSPOne("sp_master_location_update", [
       req.user.role,
       req.user.userId,
@@ -42,6 +46,8 @@ export const updateLocation = async (req, res, next) => {
       phone ?? null,
       fax ?? null,
       website ?? null,
+      remark ?? null,
+      details ?? null,
       is_active ?? 1,
     ]);
     res.json(result);
@@ -75,12 +81,14 @@ export const listDepartments = async (req, res, next) => {
 
 export const createDepartment = async (req, res, next) => {
   try {
-    const { code, name } = req.body;
+    const { code, name, remark, details } = req.body;
     const result = await callSPOne("sp_master_department_create", [
       req.user.role,
       req.user.userId,
       code,
       name,
+      remark ?? null,
+      details ?? null,
     ]);
     res.status(201).json(result);
   } catch (e) {
@@ -90,13 +98,15 @@ export const createDepartment = async (req, res, next) => {
 
 export const updateDepartment = async (req, res, next) => {
   try {
-    const { code, name, is_active } = req.body;
+    const { code, name, remark, details, is_active } = req.body;
     const result = await callSPOne("sp_master_department_update", [
       req.user.role,
       req.user.userId,
       parseInt(req.params.id),
       code,
       name,
+      remark ?? null,
+      details ?? null,
       is_active ?? 1,
     ]);
     res.json(result);
@@ -128,7 +138,7 @@ export const listDesignations = async (req, res, next) => {
 };
 export const createDesignation = async (req, res, next) => {
   try {
-    const { code, name, location_id, department_id } = req.body;
+    const { code, name, location_id, department_id, remark, details } = req.body;
     res
       .status(201)
       .json(
@@ -139,6 +149,8 @@ export const createDesignation = async (req, res, next) => {
           name,
           location_id || null,
           department_id || null,
+          remark ?? null,
+          details ?? null,
         ]),
       );
   } catch (e) {
@@ -147,7 +159,7 @@ export const createDesignation = async (req, res, next) => {
 };
 export const updateDesignation = async (req, res, next) => {
   try {
-    const { code, name, location_id, department_id, is_active } = req.body;
+    const { code, name, location_id, department_id, remark, details, is_active } = req.body;
     res.json(
       await callSPOne("sp_master_designation_update", [
         req.user.role,
@@ -157,6 +169,8 @@ export const updateDesignation = async (req, res, next) => {
         name,
         location_id || null,
         department_id || null,
+        remark ?? null,
+        details ?? null,
         is_active ?? 1,
       ]),
     );
@@ -188,7 +202,7 @@ export const listCategories = async (req, res, next) => {
 };
 export const createCategory = async (req, res, next) => {
   try {
-    const { code, name } = req.body;
+    const { code, name, remark, details } = req.body;
     res
       .status(201)
       .json(
@@ -197,6 +211,8 @@ export const createCategory = async (req, res, next) => {
           req.user.userId,
           code,
           name,
+          remark ?? null,
+          details ?? null,
         ]),
       );
   } catch (e) {
@@ -205,7 +221,7 @@ export const createCategory = async (req, res, next) => {
 };
 export const updateCategory = async (req, res, next) => {
   try {
-    const { code, name, is_active } = req.body;
+    const { code, name, remark, details, is_active } = req.body;
     res.json(
       await callSPOne("sp_master_category_update", [
         req.user.role,
@@ -213,6 +229,8 @@ export const updateCategory = async (req, res, next) => {
         parseInt(req.params.id),
         code,
         name,
+        remark ?? null,
+        details ?? null,
         is_active ?? 1,
       ]),
     );
@@ -244,7 +262,7 @@ export const listGroups = async (req, res, next) => {
 };
 export const createGroup = async (req, res, next) => {
   try {
-    const { code, name } = req.body;
+    const { code, name, remark, details } = req.body;
     res
       .status(201)
       .json(
@@ -253,6 +271,8 @@ export const createGroup = async (req, res, next) => {
           req.user.userId,
           code,
           name,
+          remark ?? null,
+          details ?? null,
         ]),
       );
   } catch (e) {
@@ -261,7 +281,7 @@ export const createGroup = async (req, res, next) => {
 };
 export const updateGroup = async (req, res, next) => {
   try {
-    const { code, name, is_active } = req.body;
+    const { code, name, remark, details, is_active } = req.body;
     res.json(
       await callSPOne("sp_master_group_update", [
         req.user.role,
@@ -269,6 +289,8 @@ export const updateGroup = async (req, res, next) => {
         parseInt(req.params.id),
         code,
         name,
+        remark ?? null,
+        details ?? null,
         is_active ?? 1,
       ]),
     );
@@ -292,16 +314,18 @@ export const listSubGroups = async (req, res, next) => {
 };
 export const createSubGroup = async (req, res, next) => {
   try {
-    const { group_id, code, name } = req.body;
+    const { group_id, code, name, remark, details } = req.body;
     res
       .status(201)
       .json(
         await callSPOne("sp_master_subgroup_create", [
           req.user.role,
           req.user.userId,
-          group_id,
           code,
           name,
+          group_id,
+          remark ?? null,
+          details ?? null,
         ]),
       );
   } catch (e) {
@@ -310,15 +334,17 @@ export const createSubGroup = async (req, res, next) => {
 };
 export const updateSubGroup = async (req, res, next) => {
   try {
-    const { group_id, code, name, is_active } = req.body;
+    const { group_id, code, name, remark, details, is_active } = req.body;
     res.json(
       await callSPOne("sp_master_subgroup_update", [
         req.user.role,
         req.user.userId,
         parseInt(req.params.id),
-        group_id,
         code,
         name,
+        group_id,
+        remark ?? null,
+        details ?? null,
         is_active ?? 1,
       ]),
     );
@@ -442,6 +468,93 @@ export const createAnnouncement = async (req, res, next) => {
         ]),
       );
   } catch (e) {
+    next(e);
+  }
+};
+
+export const updateAnnouncement = async (req, res, next) => {
+  try {
+    const { heading, type, display_start, display_end, content } = req.body;
+    res.json(
+      await callSPOne("sp_announcement_update", [
+        req.user.role,
+        req.user.userId,
+        parseInt(req.params.id),
+        heading,
+        type ?? "General",
+        display_start,
+        display_end,
+        content ?? null,
+      ])
+    );
+  } catch (e) {
+    next(e);
+  }
+};
+
+// ── BULK IMPORT ────────────────────────────────────────────────
+export const importCSV = async (req, res, next) => {
+  try {
+    const { entity } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ detail: "No CSV file uploaded." });
+    }
+
+    const results = [];
+    const validEntities = {
+      locations: "sp_master_location_create",
+      departments: "sp_master_department_create",
+      designations: "sp_master_designation_create",
+      categories: "sp_master_category_create",
+      groups: "sp_master_group_create",
+      "sub-groups": "sp_master_subgroup_create"
+    };
+
+    const spName = validEntities[entity];
+    if (!spName) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ detail: `Invalid entity for import: ${entity}` });
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+    const errors = [];
+
+    fs.createReadStream(req.file.path)
+      .pipe(csv())
+      .on("data", (data) => results.push(data))
+      .on("end", async () => {
+        for (const row of results) {
+          try {
+            let params = [];
+            if (entity === "locations") {
+              params = [req.user.role, req.user.userId, row.code, row.name, row.address || null, row.phone || null, row.fax || null, row.website || null, row.remark || null, null];
+            } else if (entity === "departments") {
+              params = [req.user.role, req.user.userId, row.code, row.name, row.remark || null, null];
+            } else if (entity === "categories" || entity === "groups" || entity === "sub-groups") {
+              params = [req.user.role, req.user.userId, row.code, row.name, row.remark || null];
+            } else if (entity === "designations") {
+              params = [req.user.role, req.user.userId, row.code, row.name, row.location_id ? parseInt(row.location_id) : null, row.department_id ? parseInt(row.department_id) : null, row.remark || null];
+            }
+
+            await callSPOne(spName, params);
+            successCount++;
+          } catch (err) {
+            failCount++;
+            errors.push(`Row Error (${row.code || row.name}): ${err.message}`);
+          }
+        }
+        
+        fs.unlinkSync(req.file.path);
+        res.json({
+          message: "Import complete",
+          successCount,
+          failCount,
+          errors: errors.slice(0, 10)
+        });
+      });
+  } catch (e) {
+    if (req.file) fs.unlinkSync(req.file.path);
     next(e);
   }
 };

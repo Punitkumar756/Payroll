@@ -1,3 +1,5 @@
+import fs from "fs";
+import csv from "csv-parser";
 import { callSP, callSPOne, q } from "../db/callProcedure.js";
 
 // ── SHIFTS ────────────────────────────────────────────────────
@@ -207,6 +209,10 @@ export const requestCorrection = async (req, res, next) => {
   try {
     const { attendance_date, requested_check_in, requested_check_out, reason } =
       req.body;
+
+    const checkInDt = toDatetime(attendance_date, requested_check_in);
+    const checkOutDt = toDatetime(attendance_date, requested_check_out);
+
     res
       .status(201)
       .json(
@@ -215,12 +221,84 @@ export const requestCorrection = async (req, res, next) => {
           req.user.employeeId,
           req.user.userId,
           attendance_date ?? null,
-          requested_check_in ?? null,
-          requested_check_out ?? null,
+          checkInDt,
+          checkOutDt,
           reason ?? null,
         ]),
       );
   } catch (e) {
+    next(e);
+  }
+};
+
+export const getDailyAttendance = async (req, res, next) => {
+  try {
+    const { date } = req.query;
+    // Default to today if no date provided
+    const targetDate = date || new Date().toISOString().split("T")[0];
+
+    res.json(
+      await callSP("sp_attendance_daily_list", [
+        req.user.role,
+        targetDate,
+      ]),
+    );
+  } catch (e) {
+    next(e);
+  }
+};
+
+// ── BULK MANUAL UPDATE ──────────────────────────────────────────
+export const bulkManualAttendance = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ detail: "No CSV file uploaded." });
+    }
+
+    const results = [];
+    let successCount = 0;
+    let failCount = 0;
+    const errors = [];
+
+    fs.createReadStream(req.file.path)
+      .pipe(csv())
+      .on("data", (data) => results.push(data))
+      .on("end", async () => {
+        for (const row of results) {
+          try {
+            const empId = parseInt(row.employee_id);
+            if (!empId) throw new Error("Missing or invalid employee_id");
+
+            const checkInDt = toDatetime(row.attendance_date, row.check_in);
+            const checkOutDt = toDatetime(row.attendance_date, row.check_out);
+
+            await callSPOne("sp_attendance_manual_update", [
+              req.user.role,
+              req.user.userId,
+              empId,
+              row.attendance_date || null,
+              row.day_status || null,
+              checkInDt,
+              checkOutDt,
+              row.remarks || null,
+            ]);
+            successCount++;
+          } catch (err) {
+            failCount++;
+            errors.push(`Row Error (Emp ${row.employee_id || '?'} on ${row.attendance_date || '?'}): ${err.message}`);
+          }
+        }
+        
+        fs.unlinkSync(req.file.path);
+        res.json({
+          message: "Import complete",
+          successCount,
+          failCount,
+          errors: errors.slice(0, 10)
+        });
+      });
+  } catch (e) {
+    if (req.file) fs.unlinkSync(req.file.path);
     next(e);
   }
 };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { dashboardApi, employeesApi, announcementsApi } from "../../api";
-import { Users, Building, ClipboardList, AlertCircle, IndianRupee, PieChart as PieChartIcon, Zap } from "lucide-react";
+import { Users, Building, ClipboardList, AlertCircle, PieChart as PieChartIcon, Zap, UserMinus, UserPlus, CalendarCheck, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
@@ -63,7 +63,7 @@ export default function AdminDashboard() {
 
       {/* KPI Cards */}
       <div className="grid-5" style={{ marginBottom: "2rem", marginTop: "-1.5rem", padding: "0 1rem", position: 'relative', zIndex: 10, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        <div className="card" style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
+        <div className="card clickable-kpi" onClick={() => navigate('/admin/employees')} style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', cursor: 'pointer', transition: 'transform 0.2s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Total Employees</p>
@@ -73,12 +73,12 @@ export default function AdminDashboard() {
               <Users size={20} />
             </div>
           </div>
-          <div style={{ marginTop: '0.75rem', fontSize: '0.85rem' }}>
+          <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', display: 'flex', gap: '0.75rem' }}>
             <span style={{ color: 'var(--clr-success)', fontWeight: 500 }}>{metrics?.active_employees || 0} Active</span>
           </div>
         </div>
 
-        <div className="card" style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
+        <div className="card clickable-kpi" onClick={() => navigate('/admin/master/departments')} style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', cursor: 'pointer', transition: 'transform 0.2s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Departments</p>
@@ -90,22 +90,9 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="card" style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Payroll Expense</p>
-              <h2 style={{ fontSize: '1.5rem', margin: 0 }}>₹{(Number(metrics?.total_payroll_expense) || 0).toLocaleString()}</h2>
-            </div>
-            <div style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#ca8a04', padding: '0.75rem', borderRadius: '12px' }}>
-              <IndianRupee size={20} />
-            </div>
-          </div>
-          <div style={{ marginTop: '0.75rem', fontSize: '0.85rem' }}>
-            <span className="text-muted">Total Paid</span>
-          </div>
-        </div>
 
-        <div className="card" style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
+
+        <div className="card clickable-kpi" onClick={() => navigate('/admin/leave/approvals')} style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', cursor: 'pointer', transition: 'transform 0.2s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Pending Leaves</p>
@@ -117,14 +104,33 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="card" style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
+        <div className="card clickable-kpi" onClick={() => navigate('/admin/attendance/daily')} style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', cursor: 'pointer', transition: 'transform 0.2s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Attendance Alerts</p>
-              <h2 style={{ fontSize: '1.75rem', margin: 0 }}>{metrics?.pending_corrections || 0}</h2>
+              <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Daily Attendance</p>
+              <h2 style={{ fontSize: '1.75rem', margin: 0 }}>{metrics?.present_today || 0} <span style={{ fontSize: '1rem', color: 'var(--clr-text-muted)', fontWeight: 400 }}>Present</span></h2>
             </div>
-            <div style={{ background: 'rgba(220, 38, 38, 0.1)', color: 'var(--clr-danger)', padding: '0.75rem', borderRadius: '12px' }}>
-              <AlertCircle size={20} />
+            <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--clr-success)', padding: '0.75rem', borderRadius: '12px' }}>
+              <CalendarCheck size={20} />
+            </div>
+          </div>
+          <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <span style={{ color: 'var(--clr-indigo)', fontWeight: 500 }}>{metrics?.leave_today || 0} Leave</span>
+            <span style={{ color: 'var(--clr-accent)', fontWeight: 500 }}>{metrics?.half_day_today || 0} Half Day</span>
+            <span style={{ color: 'var(--clr-danger)', fontWeight: 500 }}>
+              {Math.max(0, (metrics?.active_employees || 0) - (metrics?.present_today || 0) - (metrics?.leave_today || 0) - (metrics?.half_day_today || 0))} Absent/Not In
+            </span>
+          </div>
+        </div>
+
+        <div className="card clickable-kpi" onClick={() => navigate('/admin/employees?status=inactive')} style={{ padding: "1.5rem", background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', cursor: 'pointer', transition: 'transform 0.2s' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <p className="text-muted" style={{ marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Inactive Employees</p>
+              <h2 style={{ fontSize: '1.75rem', margin: 0 }}>{(metrics?.total_employees || 0) - (metrics?.active_employees || 0)}</h2>
+            </div>
+            <div style={{ background: 'rgba(100, 116, 139, 0.1)', color: 'var(--clr-text-muted)', padding: '0.75rem', borderRadius: '12px' }}>
+              <UserMinus size={20} />
             </div>
           </div>
         </div>
@@ -139,19 +145,47 @@ export default function AdminDashboard() {
               <Zap size={20} className="text-accent" /> Quick Actions
             </h3>
           </div>
-          <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-            <button className="btn" style={{ justifyContent: 'flex-start', background: 'var(--clr-bg-input)', border: '1px solid var(--clr-border)', padding: '1rem' }} onClick={() => navigate('/admin/employees/create')}>
-              + Add New Employee
-            </button>
-            <button className="btn" style={{ justifyContent: 'flex-start', background: 'var(--clr-bg-input)', border: '1px solid var(--clr-border)', padding: '1rem' }} onClick={() => navigate('/admin/payroll/process')}>
-              💸 Process Payroll
-            </button>
-            <button className="btn" style={{ justifyContent: 'flex-start', background: 'var(--clr-bg-input)', border: '1px solid var(--clr-border)', padding: '1rem' }} onClick={() => navigate('/admin/leave/approvals')}>
-              📝 Review Leaves
-            </button>
-            <button className="btn" style={{ justifyContent: 'flex-start', background: 'var(--clr-bg-input)', border: '1px solid var(--clr-border)', padding: '1rem' }} onClick={() => navigate('/admin/attendance/corrections')}>
-              ⏰ Attendance Approvals
-            </button>
+          <div style={{ padding: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem', flex: 1 }}>
+            
+            <div 
+              className="quick-action-card" 
+              onClick={() => navigate('/admin/employees/create')}
+            >
+              <div className="action-icon" style={{ background: 'rgba(10, 102, 194, 0.1)', color: '#0a66c2' }}>
+                <UserPlus size={20} />
+              </div>
+              <div className="action-text">
+                <h4>Add New Employee</h4>
+                <p>Onboard a new team member</p>
+              </div>
+            </div>
+
+            <div 
+              className="quick-action-card" 
+              onClick={() => navigate('/admin/leave/approvals')}
+            >
+              <div className="action-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+                <CalendarCheck size={20} />
+              </div>
+              <div className="action-text">
+                <h4>Review Leaves</h4>
+                <p>Manage time-off requests</p>
+              </div>
+            </div>
+
+            <div 
+              className="quick-action-card" 
+              onClick={() => navigate('/admin/attendance/corrections')}
+            >
+              <div className="action-icon" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}>
+                <Clock size={20} />
+              </div>
+              <div className="action-text">
+                <h4>Attendance Approvals</h4>
+                <p>Review missing punches & alerts</p>
+              </div>
+            </div>
+
           </div>
         </div>
 

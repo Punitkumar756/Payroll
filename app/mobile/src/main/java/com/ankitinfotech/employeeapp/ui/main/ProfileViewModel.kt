@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 sealed class ProfileUiState {
     object Loading : ProfileUiState()
-    data class Success(val employee: FullEmployee) : ProfileUiState()
+    data class Success(val employee: FullEmployee, val documents: List<com.ankitinfotech.employeeapp.api.EmployeeDocument> = emptyList()) : ProfileUiState()
     data class Error(val message: String) : ProfileUiState()
 }
 
@@ -49,9 +49,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 }
 
                 val response = apiService.getEmployeeDetails(employeeId)
+                val docsResponse = try { apiService.getDocuments(employeeId) } catch (e: Exception) { null }
+
                 if (response.isSuccessful && response.body() != null) {
                     val employee = response.body()!!
-                    _uiState.value = ProfileUiState.Success(employee)
+                    val documents = if (docsResponse?.isSuccessful == true) docsResponse.body() ?: emptyList() else emptyList()
+                    _uiState.value = ProfileUiState.Success(employee, documents)
                     
                     // Update TokenManager with potentially updated basic info
                     tokenManager.saveUserName(employee.first_name ?: "", employee.last_name ?: "")

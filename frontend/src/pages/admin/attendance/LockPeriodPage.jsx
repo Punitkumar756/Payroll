@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { attendanceApi } from "../../../api";
 import toast from "react-hot-toast";
+import { LockKeyhole, AlertOctagon, CalendarSearch, ShieldAlert } from "lucide-react";
 
 export default function LockPeriodPage() {
   const [loading, setLoading] = useState(false);
@@ -39,81 +40,92 @@ export default function LockPeriodPage() {
     <div className="animate-fade">
       <div className="page-header">
         <div className="page-header-left">
-          <h1>Lock Attendance Period</h1>
-          <p>
-            Prevent further timecard processing or manual edits for a specific
-            date range
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="stat-icon red" style={{ width: 42, height: 42 }}>
+              <LockKeyhole size={22} />
+            </div>
+            <div>
+              <h1>Lock Attendance Period</h1>
+              <p>Prevent further timecard processing or manual edits for a finalized date range</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div
-        className="card"
-        style={{ padding: "var(--sp-xl)", maxWidth: 600, margin: "0 auto" }}
-      >
-        <div
-          style={{
-            padding: "var(--sp-md)",
-            background: "rgba(239, 68, 68, 0.1)",
-            color: "#ef4444",
-            border: "1px solid rgba(239, 68, 68, 0.2)",
-            borderRadius: "var(--r-md)",
-            marginBottom: "var(--sp-lg)",
-          }}
-        >
-          <strong>⚠️ Warning:</strong> Locking an attendance period is an
-          irreversible action used before finalizing payroll. It prevents any
-          further modifications.
+      <div className="card" style={{ maxWidth: 700, margin: "0 auto", border: "1px solid rgba(239, 68, 68, 0.2)" }}>
+        
+        <div className="card-header" style={{ background: "rgba(239, 68, 68, 0.05)", borderBottom: "1px solid rgba(239, 68, 68, 0.1)" }}>
+          <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--clr-danger)' }}>
+            <ShieldAlert size={18} />
+            Danger Zone
+          </h2>
         </div>
-        <form
-          onSubmit={handleLock}
-          style={{
+
+        <div className="card-body">
+          <div style={{
+            padding: "var(--sp-md) var(--sp-lg)",
+            background: "linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.02) 100%)",
+            color: "var(--clr-text-secondary)",
+            borderLeft: "4px solid var(--clr-danger)",
+            borderRadius: "0 var(--r-md) var(--r-md) 0",
+            marginBottom: "var(--sp-xl)",
             display: "flex",
-            flexDirection: "column",
-            gap: "var(--sp-md)",
-          }}
-        >
-          <div className="form-group">
-            <label>From Date *</label>
-            <input
-              type="date"
-              className="form-control"
-              value={formData.from_date}
-              onChange={(e) =>
-                setFormData({ ...formData, from_date: e.target.value })
-              }
-              required
-            />
+            gap: "16px",
+            alignItems: "flex-start"
+          }}>
+            <AlertOctagon size={24} style={{ color: 'var(--clr-danger)', flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <h3 style={{ fontSize: '1rem', color: 'var(--clr-danger)', marginBottom: 4 }}>Irreversible Action</h3>
+              <p style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
+                Locking an attendance period is used immediately before finalizing payroll. Once locked, the system completely restricts any further modifications, manual updates, or timecard reprocessing for the selected dates.
+              </p>
+            </div>
           </div>
-          <div className="form-group">
-            <label>To Date *</label>
-            <input
-              type="date"
-              className="form-control"
-              value={formData.to_date}
-              onChange={(e) =>
-                setFormData({ ...formData, to_date: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: "var(--sp-sm)",
-            }}
-          >
-            <button
-              type="submit"
-              className="btn"
-              style={{ background: "#ef4444", color: "white" }}
-              disabled={loading}
-            >
-              {loading ? "Locking..." : "Lock Period"}
-            </button>
-          </div>
-        </form>
+
+          <form onSubmit={handleLock} style={{ display: "flex", flexDirection: "column", gap: "var(--sp-lg)" }}>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">
+                  <CalendarSearch size={14} style={{ display: 'inline', marginRight: 6, marginBottom: -2 }} />
+                  From Date *
+                </label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={formData.from_date}
+                  onChange={(e) => setFormData({ ...formData, from_date: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  <CalendarSearch size={14} style={{ display: 'inline', marginRight: 6, marginBottom: -2 }} />
+                  To Date *
+                </label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={formData.to_date}
+                  onChange={(e) => setFormData({ ...formData, to_date: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "var(--sp-sm)", paddingTop: "var(--sp-md)", borderTop: "1px solid var(--clr-border)" }}>
+              <button 
+                type="submit" 
+                className="btn btn-danger btn-lg" 
+                disabled={loading}
+                style={{ padding: '12px 32px' }}
+              >
+                <LockKeyhole size={18} />
+                {loading ? "Locking Period..." : "Confirm & Lock Period"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

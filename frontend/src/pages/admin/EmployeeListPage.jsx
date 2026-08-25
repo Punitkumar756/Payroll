@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { employeesApi } from "../../api";
 import toast from "react-hot-toast";
 import { Search, UserPlus, Info, Trash2, User } from "lucide-react";
 
 export default function EmployeeListPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+
+  const statusFilter = searchParams.get('status') || 'all';
 
   const load = async () => {
     setLoading(true);
@@ -28,6 +31,13 @@ export default function EmployeeListPage() {
     load();
   }, []);
 
+  const filteredEmployees = employees.filter(emp => {
+    const isActive = emp.status === 'Active';
+    if (statusFilter === 'active' && !isActive) return false;
+    if (statusFilter === 'inactive' && isActive) return false;
+    return true;
+  });
+
   return (
     <div className="animate-fade">
       <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -35,7 +45,17 @@ export default function EmployeeListPage() {
           <h1>Employees</h1>
           <p>Manage your organization's workforce</p>
         </div>
-        <div style={{ display: "flex", gap: "1rem" }}>
+        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+          <select 
+            className="form-select" 
+            style={{ borderRadius: "100px", padding: "0.5rem 1rem", border: "1px solid var(--clr-border)", outline: "none", cursor: "pointer", background: "var(--clr-bg-input)", color: "var(--clr-text-primary)" }}
+            value={statusFilter}
+            onChange={(e) => setSearchParams(e.target.value === 'all' ? {} : { status: e.target.value })}
+          >
+            <option value="all">All Employees</option>
+            <option value="active">Active Only</option>
+            <option value="inactive">Inactive Only</option>
+          </select>
           <div className="input-wrapper" style={{ position: "relative", minWidth: "250px", marginBottom: 0 }}>
             <Search size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--clr-text-muted)" }} />
             <input 
@@ -74,7 +94,7 @@ export default function EmployeeListPage() {
                 </tr>
               </thead>
               <tbody>
-                {employees.map((emp, index) => (
+                {filteredEmployees.map((emp, index) => (
                   <tr key={emp.id}>
                     <td style={{ textAlign: "center", color: "var(--clr-text-muted)", fontSize: "0.85rem" }}>
                       {(index + 1).toString().padStart(3, "0")}
@@ -96,7 +116,7 @@ export default function EmployeeListPage() {
                             bottom: 0, right: 0,
                             width: "12px", height: "12px",
                             borderRadius: "50%",
-                            background: emp.is_active !== false ? "var(--clr-success)" : "var(--clr-text-muted)",
+                            background: emp.status === 'Active' ? "var(--clr-success)" : "var(--clr-text-muted)",
                             border: "2px solid var(--clr-bg-card)"
                           }}></div>
                         </div>

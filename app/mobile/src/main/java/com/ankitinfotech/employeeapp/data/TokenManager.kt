@@ -24,6 +24,12 @@ class TokenManager(context: Context) {
     fun getToken(): String? =
         sharedPreferences.getString("jwt_token", null)
 
+    fun saveRefreshToken(token: String) =
+        sharedPreferences.edit().putString("refresh_token", token).apply()
+
+    fun getRefreshToken(): String? =
+        sharedPreferences.getString("refresh_token", null)
+
     fun saveEmployeeId(id: Int) =
         sharedPreferences.edit().putInt("employee_id", id).apply()
 
@@ -48,6 +54,7 @@ class TokenManager(context: Context) {
     fun clearToken() {
         sharedPreferences.edit()
             .remove("jwt_token")
+            .remove("refresh_token")
             .remove("employee_id")
             .remove("first_name")
             .remove("last_name")

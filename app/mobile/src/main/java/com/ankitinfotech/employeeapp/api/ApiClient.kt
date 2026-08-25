@@ -7,6 +7,13 @@ import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.Authenticator
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.Route
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -45,9 +52,61 @@ object ApiClient {
                 level = HttpLoggingInterceptor.Level.BODY
             }
 
+            val authenticator = object : Authenticator {
+                override fun authenticate(route: Route?, response: Response): Request? {
+                    // Prevent infinite loops if refresh token itself is unauthorized
+                    if (response.request.url.encodedPath.contains("auth/refresh")) {
+                        tokenManager.clearToken()
+                        return null
+                    }
+                    
+                    val refreshToken = tokenManager.getRefreshToken()
+                    if (refreshToken == null) {
+                        tokenManager.clearToken()
+                        return null
+                    }
+                    
+                    try {
+                        val jsonBody = JSONObject().put("refreshToken", refreshToken).toString()
+                        val requestBody = jsonBody.toRequestBody("application/json".toMediaTypeOrNull())
+                        
+                        val refreshRequest = Request.Builder()
+                            .url(BASE_URL + "auth/refresh")
+                            .post(requestBody)
+                            .header("Accept", "application/json")
+                            .header("Content-Type", "application/json")
+                            .build()
+                            
+                        val client = OkHttpClient()
+                        val refreshResponse = client.newCall(refreshRequest).execute()
+                        
+                        if (refreshResponse.isSuccessful) {
+                            val responseBody = refreshResponse.body?.string()
+                            if (responseBody != null) {
+                                val json = JSONObject(responseBody)
+                                val newAccessToken = json.optString("accessToken")
+                                if (newAccessToken.isNotEmpty()) {
+                                    tokenManager.saveToken(newAccessToken)
+                                    return response.request.newBuilder()
+                                        .removeHeader("Authorization")
+                                        .addHeader("Authorization", "Bearer $newAccessToken")
+                                        .build()
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    
+                    tokenManager.clearToken()
+                    return null
+                }
+            }
+
             val client = OkHttpClient.Builder()
                 .addInterceptor(authInterceptor)
                 .addInterceptor(loggingInterceptor)
+                .authenticator(authenticator)
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)

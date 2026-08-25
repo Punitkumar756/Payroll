@@ -17,7 +17,11 @@ async function run() {
         (SELECT COUNT(*) FROM departments) AS total_departments,
         (SELECT COUNT(*) FROM leave_applications WHERE status = 'Pending') AS pending_leaves,
         (SELECT COUNT(*) FROM attendance_correction_requests WHERE status = 'Pending') AS pending_corrections,
-        (SELECT COALESCE(SUM(net_pay), 0) FROM payslips WHERE status != 'Draft') AS total_payroll_expense;
+        (SELECT COUNT(*) FROM attendance_daily WHERE attendance_date = CURRENT_DATE AND day_status = 'Present') AS present_today,
+        (SELECT COUNT(*) FROM attendance_daily WHERE attendance_date = CURRENT_DATE AND day_status = 'Leave') AS leave_today,
+        (SELECT COUNT(*) FROM attendance_daily WHERE attendance_date = CURRENT_DATE AND day_status = 'HalfDay') AS half_day_today,
+        (SELECT COUNT(*) FROM attendance_daily WHERE attendance_date = CURRENT_DATE AND day_status = 'Absent') AS absent_today,
+        0 AS total_payroll_expense;
     END;
 
     DROP PROCEDURE IF EXISTS sp_dashboard_hr_charts;
