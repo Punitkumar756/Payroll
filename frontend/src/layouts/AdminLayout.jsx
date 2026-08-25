@@ -34,6 +34,7 @@ const navSections = [
   {
     label: "Attendance",
     items: [
+      { to: "/admin/attendance/daily", icon: "📊", label: "Daily Attendance" },
       { to: "/admin/attendance/shifts", icon: "⏰", label: "Shifts" },
       {
         to: "/admin/attendance/assign-shift",

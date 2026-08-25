@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import toast from "react-hot-toast";
@@ -10,8 +10,8 @@ export default function LoginPage() {
     username: "admin",
     password: "Admin@1234",
   });
-  const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,95 +38,127 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login-page">
-      <div className="login-card animate-slide">
-        <div className="login-logo">
-          <div className="login-logo-icon">🏢</div>
-          <h1>HRMS Portal</h1>
-          <p>Dayton Natural Resource Pvt Ltd</p>
-        </div>
-
-        <form onSubmit={handleSubmit} id="login-form">
-          <div className="form-group">
-            <label className="form-label" htmlFor="username">
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              className="form-input"
-              placeholder="Enter your username"
-              value={form.username}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, username: e.target.value }))
-              }
-              required
-              autoFocus
-            />
+    <div className="login-layout-image">
+      {/* LEFT PANEL - Hero Content */}
+      <div className="image-visual-panel">
+        
+        <div className="image-visual-content">
+          <div className="image-brand-header stagger-1">
+            <img src="/Dayton.png" alt="Dayton Logo" className="image-logo" />
+            <span className="image-brand-name">Dayton Natural Resource</span>
           </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="password">
-              Password
-            </label>
-            <div style={{ position: "relative" }}>
-              <input
-                id="password"
-                type={showPw ? "text" : "password"}
-                className="form-input"
-                placeholder="Enter your password"
-                value={form.password}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, password: e.target.value }))
-                }
-                required
-                style={{ paddingRight: 40 }}
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowPw((v) => !v)}
-                style={{
-                  position: "absolute",
-                  right: 12,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  color: "var(--clr-text-muted)",
-                  fontSize: "0.85rem",
-                }}
-              >
-                {showPw ? "🙈" : "👁️"}
-              </button>
+          
+          <div className="image-hero-text">
+            <h1 className="image-headline stagger-2">
+              Empower Your Workforce
+            </h1>
+            
+            <div className="features-grid stagger-3">
+              <div className="feature-card">
+                <span className="feature-icon">👥</span>
+                <h4>Unified HR</h4>
+                <p>Simplify operations and scale effortlessly.</p>
+              </div>
+              <div className="feature-card">
+                <span className="feature-icon">⚡</span>
+                <h4>Payroll</h4>
+                <p>Accurate, tax-compliant automated payouts.</p>
+              </div>
+              <div className="feature-card">
+                <span className="feature-icon">📈</span>
+                <h4>Analytics</h4>
+                <p>Deep insights and predictive reporting.</p>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <button
-            id="login-submit"
-            type="submit"
-            className="btn btn-primary w-full btn-lg"
-            style={{ justifyContent: "center", marginTop: "var(--sp-md)" }}
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span className="spinner" style={{ width: 18, height: 18 }} />{" "}
-                Signing in...
-              </>
-            ) : (
-              "Sign In →"
-            )}
-          </button>
-        </form>
+      {/* RIGHT PANEL - Form */}
+      <div className="image-form-panel">
+        <div className="image-form-wrapper">
+          <div className="image-form-header stagger-1">
+            <h2>Welcome Back</h2>
+            <p>Please enter your credentials to sign in.</p>
+          </div>
 
-        <p
-          className="text-muted text-center"
-          style={{ marginTop: "var(--sp-lg)", fontSize: "0.78rem" }}
-        >
-          Single-organization HRMS v1.1 — Powered by Dayton Natural Resource Pvt
-          Ltd
-        </p>
+          <form onSubmit={handleSubmit} id="login-form" className="modern-form">
+            <div className="form-group stagger-2">
+              <label className="form-label-caps" htmlFor="username">
+                USERNAME
+              </label>
+              <div className="input-wrapper">
+                <span className="input-icon">👤</span>
+                <input
+                  id="username"
+                  type="text"
+                  className="form-input-modern"
+                  placeholder="admin"
+                  value={form.username}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, username: e.target.value }))
+                  }
+                  required
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <div className="form-group stagger-3">
+              <label className="form-label-caps" htmlFor="password">
+                PASSWORD
+              </label>
+              <div className="input-wrapper">
+                <span className="input-icon">🔒</span>
+                <input
+                  id="password"
+                  type={showPw ? "text" : "password"}
+                  className="form-input-modern"
+                  placeholder="••••••••••"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, password: e.target.value }))
+                  }
+                  required
+                />
+                <button
+                  type="button"
+                  className="pw-toggle-btn"
+                  onClick={() => setShowPw((v) => !v)}
+                  aria-label={showPw ? "Hide password" : "Show password"}
+                >
+                  {showPw ? "🙈" : "👁️"}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-options stagger-4">
+              <label className="remember-me">
+                <input type="checkbox" />
+                <span>Remember me</span>
+              </label>
+              <a href="#" className="forgot-password" onClick={(e) => e.preventDefault()}>
+                Forgot password?
+              </a>
+            </div>
+
+            <button
+              id="login-submit"
+              type="submit"
+              className="btn-modern-primary w-full stagger-5"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="spinner-sm" />
+                  Authenticating...
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

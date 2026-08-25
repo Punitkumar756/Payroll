@@ -211,6 +211,14 @@ private fun LeaveApplicationItem(
                     Text("${it.toInt()} day(s)", style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+                if (!app.approver_remarks.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        "HR Remarks: ${app.approver_remarks}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                }
             }
         },
         trailingContent = {

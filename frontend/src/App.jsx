@@ -40,6 +40,7 @@ import ShiftsPage from "./pages/admin/attendance/ShiftsPage";
 import AssignShiftPage from "./pages/admin/attendance/AssignShiftPage";
 import ProcessTimeCardPage from "./pages/admin/attendance/ProcessTimeCardPage";
 import ManualAttendancePage from "./pages/admin/attendance/ManualAttendancePage";
+import DailyAttendancePage from "./pages/admin/attendance/DailyAttendancePage";
 import CorrectionRequestsPage from "./pages/admin/attendance/CorrectionRequestsPage";
 import LockPeriodPage from "./pages/admin/attendance/LockPeriodPage";
 
@@ -151,6 +152,7 @@ export default function App() {
             <Route path="users" element={<UsersRolesPage />} />
 
             {/* Attendance */}
+            <Route path="attendance/daily" element={<DailyAttendancePage />} />
             <Route path="attendance/shifts" element={<ShiftsPage />} />
             <Route
               path="attendance/assign-shift"

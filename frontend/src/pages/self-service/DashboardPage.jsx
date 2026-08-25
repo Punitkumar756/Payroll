@@ -8,9 +8,14 @@ export default function EssDashboard() {
   const [balances, setBalances] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [todayAtt, setTodayAtt] = useState(null);
+  const [attendanceHistory, setAttendanceHistory] = useState([]);
 
   useEffect(() => {
     const today = format(new Date(), "yyyy-MM-dd");
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 6);
+    const weekAgoStr = format(weekAgo, "yyyy-MM-dd");
+
     leaveApi
       .getBalance()
       .then(setBalances)
@@ -20,8 +25,12 @@ export default function EssDashboard() {
       .then(setAnnouncements)
       .catch(() => {});
     attendanceApi
-      .getSelf({ from_date: today, to_date: today })
-      .then((d) => setTodayAtt(d[0] || null))
+      .getSelf({ from_date: weekAgoStr, to_date: today })
+      .then((d) => {
+        setAttendanceHistory(d || []);
+        const todayData = (d || []).find((r) => r.date === today);
+        setTodayAtt(todayData || null);
+      })
       .catch(() => {});
   }, []);
 
@@ -97,10 +106,50 @@ export default function EssDashboard() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
           gap: "var(--sp-lg)",
         }}
       >
+        {/* Attendance History */}
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">🕒 Recent Attendance</span>
+          </div>
+          <div className="card-body" style={{ maxHeight: 280, overflowY: "auto" }}>
+            {attendanceHistory.length === 0 ? (
+              <p className="text-muted">No recent attendance records.</p>
+            ) : (
+              attendanceHistory.slice(0, 5).map((record) => (
+                <div
+                  key={record.date}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "var(--sp-md)",
+                    paddingBottom: "var(--sp-md)",
+                    borderBottom: "1px solid var(--clr-border)",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600, color: "var(--clr-text-primary)" }}>
+                      {format(new Date(record.date), "EEE, MMM dd")}
+                    </div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--clr-text-muted)", marginTop: 4 }}>
+                      In: {record.check_in ? format(new Date(record.check_in), "hh:mm a") : "—"} • Out: {record.check_out ? format(new Date(record.check_out), "hh:mm a") : "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <span className={`badge ${statusMap[record.day_status] || "badge-gray"}`}>
+                      {record.day_status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* Leave Balance */}
         <div className="card">
           <div className="card-header">

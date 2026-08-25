@@ -231,6 +231,23 @@ export const requestCorrection = async (req, res, next) => {
   }
 };
 
+export const getDailyAttendance = async (req, res, next) => {
+  try {
+    const { date } = req.query;
+    // Default to today if no date provided
+    const targetDate = date || new Date().toISOString().split("T")[0];
+
+    res.json(
+      await callSP("sp_attendance_daily_list", [
+        req.user.role,
+        targetDate,
+      ]),
+    );
+  } catch (e) {
+    next(e);
+  }
+};
+
 // ── BULK MANUAL UPDATE ──────────────────────────────────────────
 export const bulkManualAttendance = async (req, res, next) => {
   try {

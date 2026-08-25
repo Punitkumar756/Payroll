@@ -191,10 +191,10 @@ export default function ManualAttendancePage() {
                   >
                     <option value="Present">Present</option>
                     <option value="Absent">Absent</option>
-                    <option value="Half Day">Half Day</option>
+                    <option value="HalfDay">Half Day</option>
                     <option value="Leave">Leave</option>
                     <option value="Holiday">Holiday</option>
-                    <option value="Week Off">Week Off</option>
+                    <option value="WeekOff">Week Off</option>
                   </select>
                 </div>
 

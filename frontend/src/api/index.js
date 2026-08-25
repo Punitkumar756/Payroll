@@ -138,6 +138,8 @@ export const attendanceApi = {
     api.get("/attendance/self", { params }).then((r) => r.data),
   requestCorrection: (data) =>
     api.post("/attendance/self/correction", data).then((r) => r.data),
+  getDaily: (params) =>
+    api.get("/attendance/daily", { params }).then((r) => r.data),
 };
 
 // ── Leave ─────────────────────────────────────────────────────

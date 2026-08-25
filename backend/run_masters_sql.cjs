@@ -104,10 +104,12 @@ async function run() {
 
     await connection.query('DROP PROCEDURE IF EXISTS sp_master_subgroup_list');
     await connection.query(`
-      CREATE PROCEDURE sp_master_subgroup_list(IN p_caller_role VARCHAR(30))
+      CREATE PROCEDURE sp_master_subgroup_list(IN p_caller_role VARCHAR(30), IN p_group_id INT)
       BEGIN
         SELECT sg.id, sg.code, sg.name, sg.group_id, g.name AS group_name, sg.remark, sg.details, sg.is_active 
-        FROM sub_groups sg LEFT JOIN \`groups\` g ON g.id=sg.group_id ORDER BY sg.name;
+        FROM sub_groups sg LEFT JOIN \`groups\` g ON g.id=sg.group_id 
+        WHERE (p_group_id IS NULL OR sg.group_id = p_group_id)
+        ORDER BY sg.name;
       END
     `);
 

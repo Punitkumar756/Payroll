@@ -303,7 +303,7 @@ BEGIN
   IF p_caller_role != 'HR' THEN SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'ACCESS_DENIED:HR_ONLY'; END IF;
   SELECT la.id, CONCAT(e.first_name,' ',e.last_name) AS employee_name,
          e.employee_code, lt.name AS leave_type,
-         la.start_date, la.end_date, la.total_days, la.reason, la.status, la.created_at,
+         la.start_date, la.end_date, la.total_days, la.reason, la.approver_remarks, la.status, la.created_at,
          -- current balance
          IFNULL(lb.closing_balance,0) AS current_balance
   FROM leave_applications la

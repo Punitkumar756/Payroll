@@ -24,6 +24,9 @@ router.post("/lock", requireRole("HR"), c.lockAttendance);
 router.get("/corrections", requireRole("HR"), c.listCorrectionRequests);
 router.post("/corrections/:id/approve", requireRole("HR"), c.approveCorrection);
 
+// Daily Attendance (HR only)
+router.get("/daily", requireRole("HR"), c.getDailyAttendance);
+
 // Self-service
 router.get("/self", c.getAttendanceSelf);
 router.post("/self/correction", c.requestCorrection);
