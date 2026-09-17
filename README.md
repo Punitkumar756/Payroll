@@ -121,7 +121,7 @@ npm run dev
 
 ## 👨‍💻 Authors
 
-- **Punit** (Ankit Infotech And Solution)
+- **Punit** 
 
 ## 📄 License
 
