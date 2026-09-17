@@ -21,6 +21,7 @@ router.delete("/:id", requireRole("HR"), c.deleteEmployee);
 router.patch("/self/profile", c.selfUpdateEmployee);
 
 // Users & Roles (HR only)
+router.post("/users/create", requireRole("HR"), c.createStandaloneUser);
 router.get("/users/list", requireRole("HR"), c.listUsers);
 router.patch("/users/:id/activate", requireRole("HR"), c.activateUser);
 router.patch("/users/:id/deactivate", requireRole("HR"), c.deactivateUser);

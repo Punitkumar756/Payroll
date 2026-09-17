@@ -41,18 +41,18 @@ export default function LoginPage() {
     <div className="login-layout-image">
       {/* LEFT PANEL - Hero Content */}
       <div className="image-visual-panel">
-        
+
         <div className="image-visual-content">
           <div className="image-brand-header stagger-1">
             <img src="/Dayton.png" alt="Dayton Logo" className="image-logo" />
             <span className="image-brand-name">Dayton Natural Resource</span>
           </div>
-          
+
           <div className="image-hero-text">
             <h1 className="image-headline stagger-2">
               Empower Your Workforce
             </h1>
-            
+
             <div className="features-grid stagger-3">
               <div className="feature-card">
                 <span className="feature-icon">👥</span>

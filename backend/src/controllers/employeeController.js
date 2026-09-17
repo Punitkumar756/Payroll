@@ -270,3 +270,20 @@ export const deleteEmployee = async (req, res, next) => {
     next(e);
   }
 };
+
+export const createStandaloneUser = async (req, res, next) => {
+  try {
+    const { username, password, role_id } = req.body;
+    const hash = await hashPassword(password);
+    const result = await callSPOne("sp_user_create_standalone", [
+      req.user.role,
+      req.user.userId,
+      username,
+      hash,
+      role_id,
+    ]);
+    res.status(201).json(result);
+  } catch (e) {
+    next(e);
+  }
+};

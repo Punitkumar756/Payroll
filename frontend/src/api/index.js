@@ -101,6 +101,7 @@ export const documentsApi = {
 };
 
 export const usersApi = {
+  create: (data) => api.post("/employees/users/create", data).then((r) => r.data),
   list: () => api.get("/employees/users/list").then((r) => r.data),
   activate: (id) =>
     api.patch(`/employees/users/${id}/activate`).then((r) => r.data),
