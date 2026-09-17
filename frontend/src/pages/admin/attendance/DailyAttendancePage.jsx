@@ -123,6 +123,7 @@ export default function DailyAttendancePage() {
                   <th>Status</th>
                   <th>Check In</th>
                   <th>Check Out</th>
+                  <th>Total Hours</th>
                 </tr>
               </thead>
               <tbody>
@@ -157,6 +158,34 @@ export default function DailyAttendancePage() {
                       </td>
                       <td>
                         {r.check_out ? format(new Date(r.check_out), "hh:mm a") : "—"}
+                      </td>
+                      <td>
+                        {(() => {
+                          if (r.check_in) {
+                            const inTime = new Date(r.check_in);
+                            let outTime = r.check_out ? new Date(r.check_out) : null;
+                            if (!outTime) {
+                              const inDate = format(inTime, "yyyy-MM-dd");
+                              const today = format(new Date(), "yyyy-MM-dd");
+                              if (inDate === today) {
+                                outTime = new Date();
+                              }
+                            }
+                            if (outTime) {
+                              let diff = outTime - inTime;
+                              if (diff < 0) {
+                                outTime = new Date(outTime.getTime() + 24 * 3600000);
+                                diff = outTime - inTime;
+                              }
+                              if (diff >= 0) {
+                                const hrs = Math.floor(diff / 3600000);
+                                const mins = Math.floor((diff % 3600000) / 60000);
+                                return `${hrs}h ${mins}m`;
+                              }
+                            }
+                          }
+                          return "—";
+                        })()}
                       </td>
                     </tr>
                   ))

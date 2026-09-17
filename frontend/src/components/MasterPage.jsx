@@ -119,7 +119,11 @@ export default function MasterPage({
           </h4>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1rem" }}>
             {fields.map((f) => (
-              <div className="form-group" key={f.key}>
+              <div 
+                className="form-group" 
+                key={f.key}
+                style={f.type === "textarea" ? { gridColumn: "1 / -1" } : {}}
+              >
                 <label>
                   {f.label}
                   {f.required && " *"}
@@ -148,7 +152,8 @@ export default function MasterPage({
                       setForm((p) => ({ ...p, [f.key]: e.target.value }))
                     }
                     required={f.required}
-                    rows="1"
+                    rows="4"
+                    style={{ resize: "vertical" }}
                   />
                 ) : f.type === "checkbox" ? (
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>

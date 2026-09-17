@@ -44,14 +44,15 @@ fun AttendanceScreen(viewModel: AttendanceViewModel, onRequestCorrection: () -> 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Live clock
-    var currentTime by remember { mutableStateOf(LocalTime.now()) }
+    // Live clock (using Instant for accurate duration calculation)
+    var currentInstant by remember { mutableStateOf(java.time.Instant.now()) }
     LaunchedEffect(Unit) {
         while (true) {
-            currentTime = LocalTime.now()
+            currentInstant = java.time.Instant.now()
             delay(1000)
         }
     }
+    val currentTime = java.time.LocalDateTime.ofInstant(currentInstant, java.time.ZoneId.systemDefault()).toLocalTime()
 
     Scaffold(
         topBar = {
@@ -117,6 +118,7 @@ fun AttendanceScreen(viewModel: AttendanceViewModel, onRequestCorrection: () -> 
                         item {
                             ClockInCard(
                                 currentTime = currentTime,
+                                currentInstant = currentInstant,
                                 todayRecord = state.todayRecord,
                                 onClockIn = {
                                     viewModel.clockIn { ok, msg ->
@@ -172,6 +174,7 @@ fun AttendanceScreen(viewModel: AttendanceViewModel, onRequestCorrection: () -> 
 @Composable
 private fun ClockInCard(
     currentTime: LocalTime,
+    currentInstant: java.time.Instant,
     todayRecord: AttendanceRecord?,
     onClockIn: () -> Unit,
     onClockOut: () -> Unit
@@ -216,15 +219,52 @@ private fun ClockInCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
+            var totalDurationStr = "—"
+            if (isClockedIn) {
+                try {
+                    val inInstant = java.time.Instant.parse(todayRecord!!.clock_in)
+                    val outInstant = if (isClockedOut) java.time.Instant.parse(todayRecord.clock_out) else currentInstant
+                    val duration = java.time.Duration.between(inInstant, outInstant)
+                    val hours = duration.toHours()
+                    val minutes = duration.toMinutes() % 60
+                    val seconds = duration.seconds % 60
+                    totalDurationStr = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                } catch (e: Exception) {}
+            }
+
+            var expectedOutStr: String? = null
+            if (isClockedIn && todayRecord!!.start_time != null && todayRecord!!.end_time != null) {
+                try {
+                    val inInstant = java.time.Instant.parse(todayRecord!!.clock_in)
+                    val st = java.time.LocalTime.parse(todayRecord!!.start_time)
+                    val et = java.time.LocalTime.parse(todayRecord!!.end_time)
+                    var shiftDuration = java.time.Duration.between(st, et)
+                    if (shiftDuration.isNegative) shiftDuration = shiftDuration.plusDays(1)
+                    val expectedOut = inInstant.plus(shiftDuration)
+                    val expectedOutTime = java.time.LocalDateTime.ofInstant(expectedOut, java.time.ZoneId.systemDefault()).toLocalTime()
+                    val fmt = java.time.format.DateTimeFormatter.ofPattern("hh:mm a")
+                    expectedOutStr = expectedOutTime.format(fmt)
+                } catch (e: Exception) {}
+            }
+
             // Status chips row
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
                 AttendanceChip(
+                    modifier = Modifier.weight(1f),
                     label = "IN",
                     value = if (isClockedIn) formatIsoTime(todayRecord?.clock_in) else "—",
                     active = isClockedIn,
                     activeColor = MaterialTheme.colorScheme.primary
                 )
                 AttendanceChip(
+                    modifier = Modifier.weight(1f),
+                    label = "TOTAL",
+                    value = totalDurationStr,
+                    active = isClockedIn && !isClockedOut,
+                    activeColor = MaterialTheme.colorScheme.tertiary
+                )
+                AttendanceChip(
+                    modifier = Modifier.weight(1f),
                     label = "OUT",
                     value = if (isClockedOut) formatIsoTime(todayRecord?.clock_out) else "—",
                     active = isClockedOut,
@@ -254,13 +294,23 @@ private fun ClockInCard(
                     fontWeight = FontWeight.SemiBold
                 )
             }
+            
+            if (expectedOutStr != null && !isClockedOut) {
+                Text(
+                    "Expected Out: $expectedOutStr",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun AttendanceChip(label: String, value: String, active: Boolean, activeColor: Color) {
+private fun AttendanceChip(modifier: Modifier = Modifier, label: String, value: String, active: Boolean, activeColor: Color) {
     Surface(
+        modifier = modifier,
         color = if (active) activeColor.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(8.dp),
         border = if (active) ButtonDefaults.outlinedButtonBorder else null
@@ -272,7 +322,8 @@ private fun AttendanceChip(label: String, value: String, active: Boolean, active
             Text(label, style = MaterialTheme.typography.labelSmall,
                 color = if (active) activeColor else MaterialTheme.colorScheme.onSurfaceVariant)
             Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold,
-                color = if (active) activeColor else MaterialTheme.colorScheme.onSurfaceVariant)
+                color = if (active) activeColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1)
         }
     }
 }
@@ -427,7 +478,33 @@ private fun AttendanceRecordRow(rec: AttendanceRecord) {
         supportingContent = {
             val inT  = if (rec.clock_in  != null) formatIsoTime(rec.clock_in)  else "—"
             val outT = if (rec.clock_out != null) formatIsoTime(rec.clock_out) else "—"
-            Text("In: $inT   ·   Out: $outT", style = MaterialTheme.typography.bodySmall)
+            
+            var durationStr = ""
+            if (rec.clock_in != null) {
+                try {
+                    val inInstant = java.time.Instant.parse(rec.clock_in)
+                    var outInstant: java.time.Instant? = null
+                    
+                    if (rec.clock_out != null) {
+                        outInstant = java.time.Instant.parse(rec.clock_out)
+                    } else {
+                        val todayStr = java.time.LocalDate.now().toString()
+                        if (rec.date?.startsWith(todayStr) == true) {
+                            outInstant = java.time.Instant.now()
+                        }
+                    }
+                    
+                    if (outInstant != null) {
+                        val duration = java.time.Duration.between(inInstant, outInstant)
+                        val hours = duration.toHours()
+                        val minutes = duration.toMinutes() % 60
+                        if (hours > 0 || minutes > 0) {
+                            durationStr = "   ·   Total: ${hours}h ${minutes}m"
+                        }
+                    }
+                } catch(e: Exception) {}
+            }
+            Text("In: $inT   ·   Out: $outT$durationStr", style = MaterialTheme.typography.bodySmall)
         },
         leadingContent = {
             Icon(Icons.Filled.AccessTime, null,

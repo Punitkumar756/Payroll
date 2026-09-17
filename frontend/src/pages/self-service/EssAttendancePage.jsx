@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { attendanceApi } from "../../api";
 import toast from "react-hot-toast";
+import { format } from "date-fns";
 
 export default function EssAttendancePage() {
   const [attendance, setAttendance] = useState([]);
@@ -84,6 +85,7 @@ export default function EssAttendancePage() {
                 <th>Shift</th>
                 <th>Check In</th>
                 <th>Check Out</th>
+                <th>Total Hours</th>
                 <th>Late / Early</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -94,8 +96,36 @@ export default function EssAttendancePage() {
                 <tr key={a.attendance_date?.split("T")[0]}>
                   <td>{a.attendance_date?.split("T")[0]}</td>
                   <td>{a.shift_name || "-"}</td>
-                  <td>{a.check_in || "-"}</td>
-                  <td>{a.check_out || "-"}</td>
+                  <td>{a.check_in ? format(new Date(a.check_in), "hh:mm a") : "-"}</td>
+                  <td>{a.check_out ? format(new Date(a.check_out), "hh:mm a") : "-"}</td>
+                  <td>
+                    {(() => {
+                      if (a.check_in) {
+                        const inTime = new Date(a.check_in);
+                        let outTime = a.check_out ? new Date(a.check_out) : null;
+                        if (!outTime) {
+                          const inDate = format(inTime, "yyyy-MM-dd");
+                          const today = format(new Date(), "yyyy-MM-dd");
+                          if (inDate === today) {
+                            outTime = new Date();
+                          }
+                        }
+                        if (outTime) {
+                          let diff = outTime - inTime;
+                          if (diff < 0) {
+                            outTime = new Date(outTime.getTime() + 24 * 3600000);
+                            diff = outTime - inTime;
+                          }
+                          if (diff >= 0) {
+                            const hrs = Math.floor(diff / 3600000);
+                            const mins = Math.floor((diff % 3600000) / 60000);
+                            return `${hrs}h ${mins}m`;
+                          }
+                        }
+                      }
+                      return "-";
+                    })()}
+                  </td>
                   <td>
                     {a.is_late ? (
                       <span

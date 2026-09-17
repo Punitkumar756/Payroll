@@ -34,6 +34,8 @@ sealed class Screen(
         Icons.Filled.Event,    Icons.Outlined.DateRange, showInBar = false)
     object Correction   : Screen("correction",    "Correction",
         Icons.Filled.Edit,     Icons.Outlined.Edit, showInBar = false)
+    object Tasks        : Screen("tasks",         "Tasks",
+        Icons.Filled.Assignment, Icons.Outlined.Assignment, showInBar = true)
 }
 
 private val bottomBarScreens = listOf(
@@ -41,6 +43,7 @@ private val bottomBarScreens = listOf(
     Screen.Attendance,
     Screen.Leave,
     Screen.Payroll,
+    Screen.Tasks,
     Screen.Profile
 )
 
@@ -56,6 +59,7 @@ fun MainScreen(loginViewModel: LoginViewModel) {
     val announcementsViewModel: AnnouncementsViewModel = viewModel()
     val holidaysViewModel:    HolidaysViewModel    = viewModel()
     val attendanceCorrectionViewModel: AttendanceCorrectionViewModel = viewModel()
+    val tasksViewModel:       TasksViewModel       = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -121,6 +125,9 @@ fun MainScreen(loginViewModel: LoginViewModel) {
                     onBack = { navController.popBackStack() },
                     viewModel = attendanceCorrectionViewModel
                 )
+            }
+            composable(Screen.Tasks.route) {
+                TasksScreen(tasksViewModel)
             }
         }
     }

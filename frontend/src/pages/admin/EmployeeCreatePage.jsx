@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { employeesApi, departmentsApi, designationsApi, locationsApi, calendarsApi, categoriesApi, groupsApi, subGroupsApi } from '../../api';
+import { employeesApi, departmentsApi, designationsApi, locationsApi, calendarsApi, categoriesApi, groupsApi, subGroupsApi, sitesApi } from '../../api';
 import toast from 'react-hot-toast';
 import { User, Briefcase, Building, MapPin, Shield, CreditCard, ChevronRight, Save, X } from 'lucide-react';
 
@@ -18,7 +18,7 @@ export default function EmployeeCreatePage() {
   const [activeTab, setActiveTab] = useState('basic');
   const [saving, setSaving] = useState(false);
   const [masters, setMasters] = useState({
-    departments: [], designations: [], locations: [], calendars: [], categories: [], groups: [], subGroups: []
+    departments: [], designations: [], locations: [], calendars: [], categories: [], groups: [], subGroups: [], sites: []
   });
   
   const [form, setForm] = useState({
@@ -27,7 +27,7 @@ export default function EmployeeCreatePage() {
     // Employment
     joining_date: '', confirmation_date: '', status: 'Active',
     // Organization
-    department_id: '', designation_id: '', location_id: '', category_id: '', group_id: '', sub_group_id: '', calendar_id: '', reporting_manager_id: '', badge_id: '',
+    department_id: '', designation_id: '', location_id: '', category_id: '', group_id: '', sub_group_id: '', calendar_id: '', reporting_manager_id: '', badge_id: '', site_id: '',
     // Contact
     official_email: '', contact_number: '', emergency_name: '', emergency_phone: '', emergency_relation: '', current_address: '', permanent_address: '',
     // Statutory
@@ -39,9 +39,9 @@ export default function EmployeeCreatePage() {
   useEffect(() => {
     Promise.all([
       departmentsApi.list().catch(()=>[]), designationsApi.list().catch(()=>[]), locationsApi.list().catch(()=>[]), 
-      calendarsApi.list().catch(()=>[]), categoriesApi.list().catch(()=>[]), groupsApi.list().catch(()=>[]), subGroupsApi.list().catch(()=>[])
-    ]).then(([d, des, l, c, cat, g, sg]) => {
-      setMasters({ departments: Array.isArray(d)?d:[], designations: Array.isArray(des)?des:[], locations: Array.isArray(l)?l:[], calendars: Array.isArray(c)?c:[], categories: Array.isArray(cat)?cat:[], groups: Array.isArray(g)?g:[], subGroups: Array.isArray(sg)?sg:[] });
+      calendarsApi.list().catch(()=>[]), categoriesApi.list().catch(()=>[]), groupsApi.list().catch(()=>[]), subGroupsApi.list().catch(()=>[]), sitesApi.list().catch(()=>[])
+    ]).then(([d, des, l, c, cat, g, sg, sitesData]) => {
+      setMasters({ departments: Array.isArray(d)?d:[], designations: Array.isArray(des)?des:[], locations: Array.isArray(l)?l:[], calendars: Array.isArray(c)?c:[], categories: Array.isArray(cat)?cat:[], groups: Array.isArray(g)?g:[], subGroups: Array.isArray(sg)?sg:[], sites: Array.isArray(sitesData)?sitesData:[] });
     });
   }, []);
 
@@ -58,7 +58,7 @@ export default function EmployeeCreatePage() {
         department_id: form.department_id, designation_id: form.designation_id, location_id: form.location_id, 
         category_id: form.category_id, group_id: form.group_id, sub_group_id: form.sub_group_id, 
         calendar_id: form.calendar_id, reporting_manager_id: form.reporting_manager_id, 
-        official_email: form.official_email, contact_number: form.contact_number, badge_id: form.badge_id, status: form.status
+        official_email: form.official_email, contact_number: form.contact_number, badge_id: form.badge_id, status: form.status, site_id: form.site_id
       };
       
       const created = await employeesApi.create(empPayload);
@@ -219,6 +219,13 @@ export default function EmployeeCreatePage() {
                 <select className="form-select" value={form.calendar_id} onChange={e => set('calendar_id', Number(e.target.value))}>
                   <option value="">Select Calendar...</option>
                   {masters.calendars.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Site</label>
+                <select className="form-select" value={form.site_id} onChange={e => set('site_id', Number(e.target.value))}>
+                  <option value="">Select Site...</option>
+                  {masters.sites.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
                 </select>
               </div>
             </div>

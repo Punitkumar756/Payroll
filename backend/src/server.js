@@ -14,6 +14,7 @@ import leaveRoutes from "./routes/leave.js";
 import documentRoutes from "./routes/documents.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import calendarRoutes from "./routes/calendar.js";
+import tasksRoutes from "./routes/tasks.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -49,6 +50,7 @@ app.use("/api/leave", leaveRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/calendars", calendarRoutes);
+app.use("/api/tasks", tasksRoutes);
 
 // Health check
 app.get("/api/health", (_req, res) => {

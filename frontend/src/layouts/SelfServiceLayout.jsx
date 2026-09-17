@@ -28,7 +28,9 @@ export default function SelfServiceLayout() {
       
       <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon">👤</div>
+          <div className="sidebar-logo-icon">
+            <img src="/1.png" alt="Sidebar Logo" style={{ height: "32px", width: "32px", objectFit: "contain" }} />
+          </div>
           <div>
             <div className="sidebar-logo-text">My Portal</div>
             <div className="sidebar-logo-sub">Employee Self-Service</div>
