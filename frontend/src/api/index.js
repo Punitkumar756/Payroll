@@ -22,6 +22,7 @@ export const designationsApi = makeCRUD("/masters/designations");
 export const categoriesApi = makeCRUD("/masters/categories");
 export const groupsApi = makeCRUD("/masters/groups");
 export const subGroupsApi = makeCRUD("/masters/sub-groups");
+export const sitesApi = makeCRUD("/masters/sites");
 
 export const bulkImportApi = {
   upload: (entity, file) => {
@@ -118,6 +119,13 @@ export const attendanceApi = {
     api.put(`/attendance/shifts/${id}`, data).then((r) => r.data),
   assignShift: (data) =>
     api.post("/attendance/shifts/assign", data).then((r) => r.data),
+  bulkAssignShift: (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post("/attendance/shifts/assign/bulk", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data);
+  },
   processTimecard: (data) =>
     api.post("/attendance/process-timecard", data).then((r) => r.data),
   manualUpdate: (data) =>
@@ -138,8 +146,14 @@ export const attendanceApi = {
     api.get("/attendance/self", { params }).then((r) => r.data),
   requestCorrection: (data) =>
     api.post("/attendance/self/correction", data).then((r) => r.data),
+  punch: (formData) =>
+    api.post("/attendance/self/punch", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data),
   getDaily: (params) =>
     api.get("/attendance/daily", { params }).then((r) => r.data),
+  getShiftAssignmentReport: (params) =>
+    api.get("/attendance/shifts/assignments/report", { params }).then((r) => r.data),
 };
 
 // ── Leave ─────────────────────────────────────────────────────
@@ -175,4 +189,12 @@ export const leaveApi = {
 export const dashboardApi = {
   getMetrics: () => api.get("/dashboard/metrics").then((r) => r.data),
   getCharts: () => api.get("/dashboard/charts").then((r) => r.data),
+};
+
+// ── Tasks ─────────────────────────────────────────────────────
+export const tasksApi = {
+  assign: (data) => api.post("/tasks", data).then((r) => r.data),
+  listByEmployee: (employeeId) => api.get(`/tasks/employee/${employeeId}`).then((r) => r.data),
+  listAll: () => api.get("/tasks").then((r) => r.data),
+  updateStatus: (id, status) => api.patch(`/tasks/${id}/status`, { status }).then((r) => r.data),
 };

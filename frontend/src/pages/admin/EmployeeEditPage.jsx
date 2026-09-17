@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { employeesApi, departmentsApi, designationsApi, locationsApi, calendarsApi, categoriesApi, groupsApi, subGroupsApi } from '../../api';
+import { employeesApi, departmentsApi, designationsApi, locationsApi, calendarsApi, categoriesApi, groupsApi, subGroupsApi, sitesApi } from '../../api';
 import toast from 'react-hot-toast';
 import { User, Briefcase, Building, MapPin, Shield, CreditCard, ChevronRight, Save, X } from 'lucide-react';
 
@@ -22,13 +22,13 @@ export default function EmployeeEditPage() {
   const [dirty, setDirty] = useState(false);
   
   const [masters, setMasters] = useState({
-    departments: [], designations: [], locations: [], calendars: [], categories: [], groups: [], subGroups: [], managers: []
+    departments: [], designations: [], locations: [], calendars: [], categories: [], groups: [], subGroups: [], managers: [], sites: []
   });
   
   const [form, setForm] = useState({
     employee_code: '', first_name: '', middle_name: '', last_name: '', date_of_birth: '', gender: 'Male', blood_group: '', marital_status: '',
     joining_date: '', confirmation_date: '', status: 'Active',
-    department_id: '', designation_id: '', location_id: '', category_id: '', group_id: '', sub_group_id: '', calendar_id: '', reporting_manager_id: '', badge_id: '',
+    department_id: '', designation_id: '', location_id: '', category_id: '', group_id: '', sub_group_id: '', calendar_id: '', reporting_manager_id: '', badge_id: '', site_id: '',
     official_email: '', contact_number: '', emergency_name: '', emergency_phone: '', emergency_relation: '', current_address: '', permanent_address: ''
   });
 
@@ -41,12 +41,14 @@ export default function EmployeeEditPage() {
       departmentsApi.list().catch(()=>[]), designationsApi.list().catch(()=>[]), locationsApi.list().catch(()=>[]), 
       calendarsApi.list().catch(()=>[]), categoriesApi.list().catch(()=>[]), groupsApi.list().catch(()=>[]), 
       employeesApi.list({ status: "Active", page_size: 500 }).catch(()=>[]),
+      sitesApi.list().catch(()=>[]),
       employeesApi.get(id)
-    ]).then(([d, des, l, c, cat, g, empList, emp]) => {
+    ]).then(([d, des, l, c, cat, g, empList, sitesData, emp]) => {
       setMasters({ 
         departments: Array.isArray(d)?d:[], designations: Array.isArray(des)?des:[], locations: Array.isArray(l)?l:[], 
         calendars: Array.isArray(c)?c:[], categories: Array.isArray(cat)?cat:[], groups: Array.isArray(g)?g:[], 
-        subGroups: [], managers: Array.isArray(empList) ? empList.filter(e => String(e.id) !== String(id)) : []
+        subGroups: [], managers: Array.isArray(empList) ? empList.filter(e => String(e.id) !== String(id)) : [],
+        sites: Array.isArray(sitesData)?sitesData:[]
       });
 
       ['joining_date', 'date_of_birth', 'confirmation_date'].forEach(k => {
@@ -273,6 +275,13 @@ export default function EmployeeEditPage() {
                 <select className="form-select" value={form.reporting_manager_id || ''} onChange={e => set('reporting_manager_id', Number(e.target.value))}>
                   <option value="">Select Manager...</option>
                   {masters.managers.map(x => <option key={x.id} value={x.id}>{x.first_name} {x.last_name}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Site</label>
+                <select className="form-select" value={form.site_id || ''} onChange={e => set('site_id', Number(e.target.value))}>
+                  <option value="">Select Site...</option>
+                  {masters.sites.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
                 </select>
               </div>
             </div>

@@ -3,6 +3,8 @@ package com.ankitinfotech.employeeapp.api
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.*
 import retrofit2.Response
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 // ── Auth ─────────────────────────────────────────────────────
 data class LoginRequest(val username: String, val password: String)
@@ -56,7 +58,10 @@ data class AttendanceRecord(
     @SerializedName(value = "clock_in", alternate = ["clockIn", "check_in", "checkIn"]) val clock_in: String?,
     @SerializedName(value = "clock_out", alternate = ["clockOut", "check_out", "checkOut"]) val clock_out: String?,
     @SerializedName(value = "status", alternate = ["attendance_status", "attendanceStatus", "status_name", "type", "remarks"]) val status: String?,
-    @SerializedName(value = "work_hours", alternate = ["workHours", "hours", "total_hours"]) val work_hours: Double?
+    @SerializedName(value = "work_hours", alternate = ["workHours", "hours", "total_hours"]) val work_hours: Double?,
+    @SerializedName(value = "shift_name", alternate = ["shiftName", "shift"]) val shift_name: String?,
+    @SerializedName(value = "start_time", alternate = ["startTime"]) val start_time: String?,
+    @SerializedName(value = "end_time", alternate = ["endTime"]) val end_time: String?
 )
 data class TimecardRequest(val type: String, val timestamp: String)
 
@@ -107,6 +112,16 @@ data class Announcement(
     @SerializedName(value = "display_end", alternate = ["displayEnd"]) val display_end: String?,
     val content: String?,
     @SerializedName(value = "created_at", alternate = ["createdAt"]) val created_at: String?
+)
+
+// ── Tasks ─────────────────────────────────────────────────────
+data class Task(
+    val id: Int,
+    val employee_id: Int?,
+    val description: String?,
+    val status: String?,
+    @SerializedName(value = "created_at", alternate = ["createdAt"]) val created_at: String?,
+    @SerializedName(value = "updated_at", alternate = ["updatedAt"]) val updated_at: String?
 )
 
 // ── Holidays ──────────────────────────────────────────────────
@@ -173,6 +188,15 @@ interface ApiService {
     @POST("attendance/self/correction")
     suspend fun requestCorrection(@Body request: CorrectionRequest): Response<Any>
 
+    @Multipart
+    @POST("attendance/self/punch")
+    suspend fun submitPunch(
+        @Part photo: MultipartBody.Part,
+        @Part("lat") lat: RequestBody,
+        @Part("lng") lng: RequestBody,
+        @Part("type") type: RequestBody
+    ): Response<Any>
+
     @GET("leave/types")
     suspend fun getLeaveTypes(): Response<List<LeaveBalance>>
 
@@ -205,4 +229,12 @@ interface ApiService {
 
     @GET("documents/{employeeId}")
     suspend fun getDocuments(@Path("employeeId") employeeId: Int): Response<List<EmployeeDocument>>
+
+    @GET("tasks/employee/{id}")
+    suspend fun getTasks(@Path("id") employeeId: Int): Response<List<Task>>
+
+    @PATCH("tasks/self/{id}/status")
+    suspend fun updateTaskStatus(@Path("id") taskId: Int, @Body request: UpdateTaskStatusRequest): Response<Any>
 }
+
+data class UpdateTaskStatusRequest(val status: String)

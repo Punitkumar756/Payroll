@@ -45,7 +45,10 @@ class AttendanceCorrectionViewModel(application: Application) : AndroidViewModel
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val formattedDate = state.date.replace(" ", "-").replace("/", "-")
+                var formattedDate = state.date.replace(" ", "-").replace("/", "-")
+                if (formattedDate.length == 8 && formattedDate.all { it.isDigit() }) {
+                    formattedDate = "${formattedDate.substring(0, 4)}-${formattedDate.substring(4, 6)}-${formattedDate.substring(6, 8)}"
+                }
                 val formattedCheckIn = state.checkIn.replace(" ", ":").replace(".", ":").ifBlank { null }
                 val formattedCheckOut = state.checkOut.replace(" ", ":").replace(".", ":").ifBlank { null }
                 

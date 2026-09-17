@@ -2,6 +2,58 @@ import fs from "fs";
 import csv from "csv-parser";
 import { callSP, callSPOne, q } from "../db/callProcedure.js";
 
+// ── SITES ─────────────────────────────────────────────────
+export const listSites = async (req, res, next) => {
+  try {
+    const data = await callSP("sp_master_site_list", [q(req.user.role)]);
+    res.json(data);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const createSite = async (req, res, next) => {
+  try {
+    const { code, name, lat, lng, radius, remark, details } = req.body;
+    const result = await callSPOne("sp_master_site_create", [
+      req.user.role,
+      req.user.userId,
+      code,
+      name,
+      lat ?? null,
+      lng ?? null,
+      radius ?? null,
+      remark ?? null,
+      details ?? null,
+    ]);
+    res.status(201).json(result);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const updateSite = async (req, res, next) => {
+  try {
+    const { code, name, lat, lng, radius, remark, details, is_active } = req.body;
+    const result = await callSPOne("sp_master_site_update", [
+      req.user.role,
+      req.user.userId,
+      parseInt(req.params.id),
+      code,
+      name,
+      lat ?? null,
+      lng ?? null,
+      radius ?? null,
+      remark ?? null,
+      details ?? null,
+      is_active ?? 1,
+    ]);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+};
+
 // ── LOCATIONS ─────────────────────────────────────────────────
 export const listLocations = async (req, res, next) => {
   try {

@@ -18,6 +18,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.ankitinfotech.employeeapp.api.Announcement
 import com.ankitinfotech.employeeapp.api.AttendanceRecord
 import com.ankitinfotech.employeeapp.api.DashboardSummary
@@ -103,6 +114,7 @@ fun DashboardScreen(
                 }
                 is DashboardUiState.Success -> DashboardContent(
                     summary = state.summary,
+                    viewModel = viewModel,
                     onViewAnnouncements = onViewAnnouncements,
                     onViewHolidays = onViewHolidays
                 )
@@ -126,9 +138,84 @@ private fun DashboardSkeleton() {
 @Composable
 fun DashboardContent(
     summary: DashboardSummary,
+    viewModel: DashboardViewModel,
     onViewAnnouncements: () -> Unit,
     onViewHolidays: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    var isPunching by remember { mutableStateOf(false) }
+    var requestedPunchType by remember { mutableStateOf("") }
+    
+    val takePictureLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+        if (bitmap != null) {
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                val locationListener = object : LocationListener {
+                    override fun onLocationChanged(location: Location) {
+                        locationManager.removeUpdates(this)
+                        viewModel.punch(bitmap, location.latitude, location.longitude, requestedPunchType) { success, msg ->
+                            isPunching = false
+                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
+                    override fun onProviderEnabled(provider: String) {}
+                    override fun onProviderDisabled(provider: String) {
+                        isPunching = false
+                        Toast.makeText(context, "Location provider disabled. Please turn on GPS.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                
+                try {
+                    val lastKnown = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) 
+                        ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                        
+                    if (lastKnown != null && (System.currentTimeMillis() - lastKnown.time) < 1000 * 60 * 5) {
+                        viewModel.punch(bitmap, lastKnown.latitude, lastKnown.longitude, requestedPunchType) { success, msg ->
+                            isPunching = false
+                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
+                    }
+                } catch (e: Exception) {
+                    isPunching = false
+                    Toast.makeText(context, "Failed to get location", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                isPunching = false
+                Toast.makeText(context, "Location permission missing", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            isPunching = false
+            Toast.makeText(context, "Failed to capture photo", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val permissionsLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        val cameraGranted = permissions[Manifest.permission.CAMERA] == true
+        val locationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        
+        if (cameraGranted && locationGranted) {
+            takePictureLauncher.launch(null)
+        } else {
+            isPunching = false
+            Toast.makeText(context, "Camera and Location permissions are required for Live Punch", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    val handlePunchRequest = { type: String ->
+        isPunching = true
+        requestedPunchType = type
+        val hasCamera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        val hasLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        if (hasCamera && hasLocation) {
+            takePictureLauncher.launch(null)
+        } else {
+            permissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION))
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -151,10 +238,36 @@ fun DashboardContent(
             }
         }
 
-        // ── Today's Attendance ────────────────────────────────────
+        // ── Today's Attendance & Live Punch ──────────────────────────
         item {
             SectionHeader("Today's Attendance")
             AttendanceSummaryCard(summary.todayAttendance)
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                val hasPunchedIn = summary.todayAttendance?.clock_in != null
+                val hasPunchedOut = summary.todayAttendance?.clock_out != null
+
+                Button(
+                    onClick = { handlePunchRequest("IN") },
+                    modifier = Modifier.weight(1f),
+                    enabled = !isPunching && (!hasPunchedIn || hasPunchedOut),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(if (isPunching && requestedPunchType == "IN") "..." else "PUNCH IN")
+                }
+                
+                Button(
+                    onClick = { handlePunchRequest("OUT") },
+                    modifier = Modifier.weight(1f),
+                    enabled = !isPunching && hasPunchedIn && !hasPunchedOut,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(if (isPunching && requestedPunchType == "OUT") "..." else "PUNCH OUT")
+                }
+            }
         }
 
         // ── Announcements ─────────────────────────────────────────
@@ -296,6 +409,14 @@ private fun LeaveBalanceChip(bal: LeaveBalance) {
 
 @Composable
 private fun AttendanceSummaryCard(att: AttendanceRecord?) {
+    var currentTime by remember { mutableStateOf(java.time.Instant.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentTime = java.time.Instant.now()
+            kotlinx.coroutines.delay(1000)
+        }
+    }
+
     ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -316,8 +437,48 @@ private fun AttendanceSummaryCard(att: AttendanceRecord?) {
                 }
                 Text(displayStatus, fontWeight = FontWeight.Bold,
                     color = statusColor, style = MaterialTheme.typography.titleMedium)
-                if (att?.clock_in != null)
+                if (att?.clock_in != null) {
                     Text("In: ${formatIsoTime(att.clock_in)}", style = MaterialTheme.typography.bodySmall)
+                    
+                    val totalDurationStr = try {
+                        val inInstant = java.time.Instant.parse(att.clock_in)
+                        val outInstant = if (att.clock_out != null) java.time.Instant.parse(att.clock_out) else currentTime
+                        val duration = java.time.Duration.between(inInstant, outInstant)
+                        val hours = duration.toHours()
+                        val minutes = duration.toMinutes() % 60
+                        val seconds = duration.seconds % 60
+                        String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                    } catch (e: Exception) {
+                        null
+                    }
+                    if (totalDurationStr != null) {
+                        Text("Total: $totalDurationStr", 
+                             style = MaterialTheme.typography.bodySmall, 
+                             fontWeight = FontWeight.Bold,
+                             color = MaterialTheme.colorScheme.primary)
+
+                        if (att.start_time != null && att.end_time != null) {
+                            val expectedOutStr = try {
+                                val inInstant = java.time.Instant.parse(att.clock_in)
+                                val st = java.time.LocalTime.parse(att.start_time)
+                                val et = java.time.LocalTime.parse(att.end_time)
+                                var shiftDuration = java.time.Duration.between(st, et)
+                                if (shiftDuration.isNegative) {
+                                    shiftDuration = shiftDuration.plusDays(1)
+                                }
+                                val expectedOut = inInstant.plus(shiftDuration)
+                                val expectedOutTime = java.time.LocalDateTime.ofInstant(expectedOut, java.time.ZoneId.systemDefault()).toLocalTime()
+                                val fmt = java.time.format.DateTimeFormatter.ofPattern("hh:mm a")
+                                "Expected Out: ${expectedOutTime.format(fmt)}"
+                            } catch (e: Exception) {
+                                null
+                            }
+                            if (expectedOutStr != null) {
+                                Text(expectedOutStr, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                    }
+                }
                 if (att?.clock_out != null)
                     Text("Out: ${formatIsoTime(att.clock_out)}", style = MaterialTheme.typography.bodySmall)
             }

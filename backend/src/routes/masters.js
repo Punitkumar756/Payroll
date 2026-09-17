@@ -18,6 +18,10 @@ router.get("/locations", c.listLocations);
 router.post("/locations", requireRole("HR"), c.createLocation);
 router.put("/locations/:id", requireRole("HR"), c.updateLocation);
 router.delete("/locations/:id", requireRole("HR"), c.deleteLocation);
+// Sites
+router.get("/sites", c.listSites);
+router.post("/sites", requireRole("HR"), c.createSite);
+router.put("/sites/:id", requireRole("HR"), c.updateSite);
 
 // Departments
 router.get("/departments", c.listDepartments);

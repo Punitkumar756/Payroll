@@ -6,6 +6,7 @@ import * as c from "../controllers/attendanceController.js";
 
 const router = Router();
 const upload = multer({ dest: 'uploads/temp/' });
+const uploadPunch = multer({ dest: 'public/uploads/attendance/' });
 router.use(authenticate);
 
 // Shifts (HR only)
@@ -13,6 +14,8 @@ router.get("/shifts", c.listShifts);
 router.post("/shifts", requireRole("HR"), c.createShift);
 router.put("/shifts/:id", requireRole("HR"), c.updateShift);
 router.post("/shifts/assign", requireRole("HR"), c.assignShift);
+router.get("/shifts/assignments/report", requireRole("HR"), c.getShiftAssignmentReport);
+router.post("/shifts/assign/bulk", requireRole("HR"), upload.single("file"), c.bulkAssignShift);
 
 // Timecard (HR only)
 router.post("/process-timecard", requireRole("HR"), c.processTimecard);
@@ -30,5 +33,6 @@ router.get("/daily", requireRole("HR"), c.getDailyAttendance);
 // Self-service
 router.get("/self", c.getAttendanceSelf);
 router.post("/self/correction", c.requestCorrection);
+router.post("/self/punch", uploadPunch.single("photo"), c.selfPunch);
 
 export default router;

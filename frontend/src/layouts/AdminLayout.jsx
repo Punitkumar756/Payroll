@@ -11,6 +11,7 @@ const navSections = [
     label: "Configuration",
     items: [
       { to: "/admin/masters/locations", icon: "📍", label: "Locations" },
+      { to: "/admin/masters/sites", icon: "🌍", label: "Sites" },
       { to: "/admin/masters/departments", icon: "🏗️", label: "Departments" },
       { to: "/admin/masters/designations", icon: "💼", label: "Designations" },
       { to: "/admin/masters/categories", icon: "🏷️", label: "Categories" },
@@ -29,6 +30,8 @@ const navSections = [
     items: [
       { to: "/admin/employees", icon: "👤", label: "Employees" },
       { to: "/admin/users", icon: "🔑", label: "Users & Roles" },
+      { to: "/admin/tasks/assign", icon: "📝", label: "Assign Tasks" },
+      { to: "/admin/tasks/tracker", icon: "📋", label: "Task Tracker" },
     ],
   },
   {
@@ -86,7 +89,9 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon">🏢</div>
+          <div className="sidebar-logo-icon">
+            <img src="/1.png" alt="Sidebar Logo" style={{ height: "32px", width: "32px", objectFit: "contain" }} />
+          </div>
           <div>
             <div className="sidebar-logo-text">HRMS Admin</div>
             <div className="sidebar-logo-sub">
@@ -148,7 +153,7 @@ export default function AdminLayout() {
               alt="Dayton Logo"
               style={{ height: "53px", width: "115px", objectFit: "contain" }} x
             />
-            <span className="topbar-title">HR Management System</span>
+            <span className="topbar-title">Human Resource Management System</span>
           </div>
           <div className="topbar-actions">
             <div className="user-badge" id="user-badge">

@@ -64,6 +64,7 @@ export const createEmployee = async (req, res, next) => {
       b.official_email ?? null,
       b.contact_number ?? null,
       b.badge_id ?? null,
+      b.site_id ?? null,
     ]);
     res.status(201).json(result);
   } catch (e) {
@@ -97,6 +98,7 @@ export const updateEmployee = async (req, res, next) => {
       b.official_email        || null,
       b.contact_number        || null,
       b.badge_id              || null,
+      b.site_id               || null,
     ]);
     res.json(result);
   } catch (e) {

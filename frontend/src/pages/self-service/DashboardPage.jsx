@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "../../auth/AuthContext";
 import { leaveApi, announcementsApi, attendanceApi } from "../../api";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
+import Webcam from "react-webcam";
 
 export default function EssDashboard() {
   const { user } = useAuth();
@@ -9,21 +11,17 @@ export default function EssDashboard() {
   const [announcements, setAnnouncements] = useState([]);
   const [todayAtt, setTodayAtt] = useState(null);
   const [attendanceHistory, setAttendanceHistory] = useState([]);
+  
+  const webcamRef = useRef(null);
+  const [punching, setPunching] = useState(false);
+  const [punchType, setPunchType] = useState('IN');
+  const [cameraError, setCameraError] = useState(false);
 
-  useEffect(() => {
+  const fetchAttendance = useCallback(() => {
     const today = format(new Date(), "yyyy-MM-dd");
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 6);
     const weekAgoStr = format(weekAgo, "yyyy-MM-dd");
-
-    leaveApi
-      .getBalance()
-      .then(setBalances)
-      .catch(() => {});
-    announcementsApi
-      .list({ active_only: true })
-      .then(setAnnouncements)
-      .catch(() => {});
     attendanceApi
       .getSelf({ from_date: weekAgoStr, to_date: today })
       .then((d) => {
@@ -33,6 +31,62 @@ export default function EssDashboard() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    leaveApi
+      .getBalance()
+      .then(setBalances)
+      .catch(() => {});
+    announcementsApi
+      .list({ active_only: true })
+      .then(setAnnouncements)
+      .catch(() => {});
+    fetchAttendance();
+  }, [fetchAttendance]);
+
+  const handlePunch = useCallback(async (type) => {
+    setPunchType(type);
+    setPunching(true);
+    try {
+      if (!webcamRef.current) throw new Error("Camera not ready.");
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (!imageSrc) throw new Error("Could not capture photo.");
+      
+      const res = await fetch(imageSrc);
+      const blob = await res.blob();
+      const file = new File([blob], "punch.jpg", { type: "image/jpeg" });
+
+      const position = await new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error("Geolocation is not supported by your browser"));
+        } else {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { 
+            enableHighAccuracy: true, timeout: 10000 
+          });
+        }
+      });
+
+      const { latitude, longitude } = position.coords;
+
+      const formData = new FormData();
+      formData.append('photo', file);
+      formData.append('lat', latitude);
+      formData.append('lng', longitude);
+      formData.append('type', type);
+
+      await attendanceApi.punch(formData);
+      toast.success(`Successfully punched ${type}`);
+      fetchAttendance();
+    } catch (err) {
+      if (err.code === 1 || err.PERMISSION_DENIED) { 
+        toast.error("Location access denied. Please enable GPS.");
+      } else {
+        toast.error(err?.response?.data?.detail || err.message || "Failed to punch");
+      }
+    } finally {
+      setPunching(false);
+    }
+  }, [webcamRef, fetchAttendance]);
 
   const statusMap = {
     Present: "badge-green",
@@ -110,6 +164,61 @@ export default function EssDashboard() {
           gap: "var(--sp-lg)",
         }}
       >
+        {/* Live Punch */}
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">📸 Live Punch</span>
+          </div>
+          <div className="card-body" style={{ textAlign: 'center' }}>
+            {cameraError ? (
+              <div style={{ padding: '2rem', background: 'rgba(239,68,68,0.1)', color: 'var(--clr-danger)', borderRadius: 8 }}>
+                Camera access denied or unavailable. Please enable camera permissions to punch in.
+              </div>
+            ) : (
+              <div style={{ marginBottom: '1rem', borderRadius: 8, overflow: 'hidden', border: '2px solid var(--clr-border)', position: 'relative' }}>
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  videoConstraints={{ facingMode: "user" }}
+                  onUserMediaError={() => setCameraError(true)}
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
+                {punching && (
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+                    Punching {punchType}...
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <button 
+                className="btn btn-primary" 
+                style={{ background: 'var(--clr-success)', borderColor: 'var(--clr-success)' }}
+                onClick={() => handlePunch('IN')}
+                disabled={punching || cameraError || (todayAtt && todayAtt.check_in && !todayAtt.check_out)}
+              >
+                PUNCH IN
+              </button>
+              <button 
+                className="btn btn-primary" 
+                style={{ background: 'var(--clr-danger)', borderColor: 'var(--clr-danger)' }}
+                onClick={() => handlePunch('OUT')}
+                disabled={punching || cameraError || !todayAtt?.check_in || todayAtt?.check_out}
+              >
+                PUNCH OUT
+              </button>
+            </div>
+            {(todayAtt?.check_in || todayAtt?.check_out) && (
+              <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--clr-text-muted)' }}>
+                {todayAtt.check_in && <div>Punched In: {format(new Date(todayAtt.check_in), "hh:mm a")}</div>}
+                {todayAtt.check_out && <div>Punched Out: {format(new Date(todayAtt.check_out), "hh:mm a")}</div>}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Attendance History */}
         <div className="card">
           <div className="card-header">

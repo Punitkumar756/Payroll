@@ -10,8 +10,38 @@ import {
   announcementsApi,
   holidaysApi,
   calendarsApi,
+  sitesApi,
 } from "../../api";
 import toast from "react-hot-toast";
+
+// ── Sites ─────────────────────────────────────────────────
+export function SitesPage() {
+  return (
+    <MasterPage
+      title="Sites"
+      description="Manage geofenced sites for employees"
+      api={sitesApi}
+      columns={[
+        { key: "code", label: "Code" },
+        { key: "name", label: "Name" },
+        { key: "lat", label: "Latitude" },
+        { key: "lng", label: "Longitude" },
+        { key: "radius", label: "Radius (m)" },
+        { key: "remark", label: "Remark" },
+        { key: "is_active", label: "Status", render: (r) => (r.is_active ? "Active" : "Inactive") },
+      ]}
+      fields={[
+        { key: "code", label: "Code", required: true },
+        { key: "name", label: "Name", required: true },
+        { key: "lat", label: "Latitude", type: "number" },
+        { key: "lng", label: "Longitude", type: "number" },
+        { key: "radius", label: "Radius (meters)", type: "number" },
+        { key: "remark", label: "Remark" },
+        { key: "is_active", label: "Active", type: "checkbox" },
+      ]}
+    />
+  );
+}
 
 // ── Locations ─────────────────────────────────────────────────
 export function LocationsPage() {

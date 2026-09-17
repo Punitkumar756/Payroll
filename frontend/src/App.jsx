@@ -21,6 +21,7 @@ import {
   SubGroupsPage,
   AnnouncementsPage,
   HolidaysPage,
+  SitesPage,
 } from "./pages/admin/MasterPages";
 
 import CalendarDashboard from "./pages/admin/calendar/CalendarDashboard";
@@ -34,6 +35,8 @@ import EmployeeCreatePage from "./pages/admin/EmployeeCreatePage";
 import EmployeeEditPage from "./pages/admin/EmployeeEditPage";
 import EmployeeDetailPage from "./pages/admin/EmployeeDetailPage";
 import UsersRolesPage from "./pages/admin/UsersRolesPage";
+import AssignTaskPage from "./pages/admin/tasks/AssignTaskPage";
+import TaskTrackerPage from "./pages/admin/tasks/TaskTrackerPage";
 
 // Admin — Attendance
 import ShiftsPage from "./pages/admin/attendance/ShiftsPage";
@@ -127,6 +130,7 @@ export default function App() {
             <Route path="masters/categories" element={<CategoriesPage />} />
             <Route path="masters/groups" element={<GroupsPage />} />
             <Route path="masters/sub-groups" element={<SubGroupsPage />} />
+            <Route path="masters/sites" element={<SitesPage />} />
             <Route
               path="masters/announcements"
               element={<AnnouncementsPage />}
@@ -150,6 +154,8 @@ export default function App() {
               element={<EmployeeDetailPage />}
             />
             <Route path="users" element={<UsersRolesPage />} />
+            <Route path="tasks/assign" element={<AssignTaskPage />} />
+            <Route path="tasks/tracker" element={<TaskTrackerPage />} />
 
             {/* Attendance */}
             <Route path="attendance/daily" element={<DailyAttendancePage />} />

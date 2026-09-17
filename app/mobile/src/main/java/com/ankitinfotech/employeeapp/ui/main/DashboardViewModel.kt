@@ -8,6 +8,9 @@ import com.ankitinfotech.employeeapp.api.DashboardSummary
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 sealed class DashboardUiState {
     object Loading : DashboardUiState()
@@ -68,6 +71,35 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             } catch (e: Exception) {
                 _uiState.value = DashboardUiState.Error(e.message ?: "Network error")
+            }
+        }
+    }
+    
+    fun punch(bitmap: android.graphics.Bitmap, lat: Double, lng: Double, type: String, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val file = java.io.File(getApplication<Application>().cacheDir, "punch.jpg")
+                val fos = java.io.FileOutputStream(file)
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, fos)
+                fos.close()
+
+                val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+                val body = okhttp3.MultipartBody.Part.createFormData("photo", file.name, requestFile)
+                val latBody = lat.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+                val lngBody = lng.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+                val typeBody = type.toRequestBody("text/plain".toMediaTypeOrNull())
+
+                val response = apiService.submitPunch(body, latBody, lngBody, typeBody)
+                if (response.isSuccessful) {
+                    onResult(true, "Successfully punched $type")
+                    refresh()
+                } else {
+                    val errorObj = response.errorBody()?.string()?.let { org.json.JSONObject(it) }
+                    val msg = errorObj?.optString("detail") ?: "Failed to punch"
+                    onResult(false, msg)
+                }
+            } catch (e: Exception) {
+                onResult(false, e.message ?: "Network error")
             }
         }
     }
