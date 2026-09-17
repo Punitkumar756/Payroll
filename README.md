@@ -1,6 +1,6 @@
 # HRMS & Payroll System
 
-A comprehensive Human Resource Management and Payroll system built by Ankit Infotech And Solution. This repository contains the full stack for the application, including a web-based frontend, a Node.js REST API backend, and an Android mobile application.
+A comprehensive Human Resource Management and Payroll system built by Dayton Natural Resource Pvt Limited. This repository contains the full stack for the application, including a web-based frontend, a Node.js REST API backend, and an Android mobile application.
 
 ## Project Structure
 
@@ -121,7 +121,7 @@ npm run dev
 
 ## 👨‍💻 Authors
 
-- **Punit** 
+- **Punit**
 
 ## 📄 License
 
