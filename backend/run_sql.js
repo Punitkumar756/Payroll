@@ -1,17 +1,21 @@
-const fs = require('fs');
-const mysql = require('mysql2/promise');
+import dotenv from 'dotenv';
+dotenv.config();
+import fs from 'fs';
+import pool from './src/db/pool.js';
 
 async function run() {
-  const connection = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Punit@12',
-    database: 'hrms',
-    multipleStatements: true
-  });
-  const sql = fs.readFileSync('../db/procedures/04_leave.sql', 'utf8');
-  await connection.query(sql);
-  console.log('Done');
+  const sql = fs.readFileSync('create_tables.sql', 'utf8');
+  const statements = sql.split(';').map(s => s.trim()).filter(s => s.length > 0);
+  
+  for (const statement of statements) {
+    try {
+      await pool.query(statement);
+      console.log('Executed statement successfully.');
+    } catch (e) {
+      console.error('Error executing statement:', e.message);
+    }
+  }
+  
   process.exit(0);
 }
 run();
