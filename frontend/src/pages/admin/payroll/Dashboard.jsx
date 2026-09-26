@@ -155,7 +155,7 @@ export default function SingleFileDashboard() {
       } catch (error) {
         // Fallback default mock data matching the screenshot
         setDepartmentData([
-          { id: 1, name: 'IT Department', head: 'Rahul Sharma', total: 156, active: 150, color: '#6366f1', icon: Monitor, payroll: '₹ 1,25,00,000', percentage: 36 },
+          { id: 1, name: 'IT Department', head: 'Rahul Sharma', total: 156, active: 150, color: 'var(--clr-primary)', icon: Monitor, payroll: '₹ 1,25,00,000', percentage: 36 },
           { id: 2, name: 'HR Department', head: 'Priya Singh', total: 132, active: 128, color: '#3b82f6', icon: User, payroll: '₹ 75,60,000', percentage: 22 },
           { id: 3, name: 'Finance Department', head: 'Amit Kumar', total: 128, active: 125, color: '#06b6d4', icon: Wallet, payroll: '₹ 85,20,000', percentage: 25 },
           { id: 4, name: 'Operations', head: 'Neha Verma', total: 84, active: 80, color: '#10b981', icon: TrendingUp, payroll: '₹ 45,30,000', percentage: 13 },
@@ -374,8 +374,8 @@ export default function SingleFileDashboard() {
               {/* Top Metric Cards Grid */}
               <div style={styles.statsGrid} className="stats-grid-container">
                 <div style={styles.statCard} className="stat-card-hover" onClick={() => showToast('Total active workforce metrics displayed.')}>
-                  <div style={{ ...styles.statIconContainer, backgroundColor: '#f3e8ff' }}>
-                    <Users size={18} color="#9333ea" />
+                  <div style={{ ...styles.statIconContainer, backgroundColor: 'var(--clr-primary-glow)' }}>
+                    <Users size={18} color='var(--clr-primary-light)' />
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={styles.statLabel}>Total Employees</div>
@@ -562,7 +562,7 @@ export default function SingleFileDashboard() {
                             filteredEmployees.map((emp, index) => {
                               const isSelected = selectedRowIds.includes(emp.id);
                               return (
-                                <tr key={index} className="table-row-hover" style={{ ...styles.trRow, ...(isSelected ? { backgroundColor: '#f5f3ff' } : {}) }}>
+                                <tr key={index} className="table-row-hover" style={{ ...styles.trRow, ...(isSelected ? { backgroundColor: 'var(--clr-primary-glow)' } : {}) }}>
                                   <td style={{ ...styles.td, textAlign: 'center' }}>
                                     <input
                                       type="checkbox"
@@ -570,7 +570,7 @@ export default function SingleFileDashboard() {
                                       onChange={() => handleSelectRow(emp.id)}
                                     />
                                   </td>
-                                  <td style={{ ...styles.td, fontWeight: '600', color: '#7c3aed' }}>{emp.id}</td>
+                                  <td style={{ ...styles.td, fontWeight: '600', color: 'var(--clr-primary)' }}>{emp.id}</td>
                                   <td style={{ ...styles.td, fontWeight: '600', color: '#0f172a' }}>{emp.name}</td>
                                   <td style={styles.td}>{emp.email}</td>
                                   <td style={styles.td}>{emp.phone}</td>
@@ -614,7 +614,7 @@ export default function SingleFileDashboard() {
                                         style={styles.actionIconButton}
                                         title="Edit Employee Details"
                                       >
-                                        <Edit size={13} color="#7c3aed" />
+                                        <Edit size={13} color='var(--clr-primary)' />
                                       </button>
 
                                       {/* Delete Action Button */}
@@ -872,7 +872,7 @@ export default function SingleFileDashboard() {
               <div style={styles.modalCard} onClick={(e) => e.stopPropagation()}>
                 <div style={styles.modalHeader}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ ...styles.brandIconBox, width: '28px', height: '28px', backgroundColor: '#7c3aed' }}>
+                    <div style={{ ...styles.brandIconBox, width: '28px', height: '28px', backgroundColor: 'var(--clr-primary)' }}>
                       <Edit size={14} color="#ffffff" />
                     </div>
                     <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Edit Employee: {selectedEmployee.id}</h3>
@@ -1102,7 +1102,7 @@ const styles = {
     width: '28px',
     height: '28px',
     borderRadius: '6px',
-    backgroundColor: '#7c3aed',
+    backgroundColor: 'var(--clr-primary)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
@@ -1258,8 +1258,8 @@ const styles = {
   selectedBadge: {
     fontSize: '10px',
     fontWeight: '600',
-    backgroundColor: '#ede9fe',
-    color: '#7c3aed',
+    backgroundColor: 'var(--clr-primary-glow)',
+    color: 'var(--clr-primary)',
     padding: '2px 6px',
     borderRadius: '4px'
   },
@@ -1313,7 +1313,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
-    backgroundColor: '#7c3aed',
+    backgroundColor: 'var(--clr-primary)',
     border: 'none',
     borderRadius: '6px',
     padding: '6px 10px',
@@ -1467,7 +1467,7 @@ const styles = {
     cursor: 'pointer'
   },
   submitBtn: {
-    backgroundColor: '#7c3aed',
+    backgroundColor: 'var(--clr-primary)',
     border: 'none',
     borderRadius: '6px',
     padding: '6px 14px',

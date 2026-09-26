@@ -251,7 +251,7 @@ export default function ProcessPayslip({ onBack }) {
       {onBack && (
         <button 
           onClick={onBack}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#7c3aed', fontWeight: '600', fontSize: '13px', cursor: 'pointer', marginBottom: '16px', padding: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: 'var(--clr-primary)', fontWeight: '600', fontSize: '13px', cursor: 'pointer', marginBottom: '16px', padding: 0 }}
         >
           <ArrowLeft size={16} /> Back to Dashboard
         </button>
@@ -270,7 +270,7 @@ export default function ProcessPayslip({ onBack }) {
               setNewEmp(prev => ({ ...prev, financialYear, period: payPeriod }));
               setIsModalOpen(true);
             }}
-            style={{ backgroundColor: '#7c3aed', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+            style={{ backgroundColor: 'var(--clr-primary)', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
           >
             <UserPlus size={14} /> Add New Employee Payslip
           </button>
@@ -322,7 +322,7 @@ export default function ProcessPayslip({ onBack }) {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button 
                 onClick={handleProcess}
-                style={{ backgroundColor: '#7c3aed', border: 'none', borderRadius: '6px', padding: '0 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', height: '34px' }}
+                style={{ backgroundColor: 'var(--clr-primary)', border: 'none', borderRadius: '6px', padding: '0 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', height: '34px' }}
               >
                 <Play size={14} /> Process
               </button>
@@ -567,7 +567,7 @@ export default function ProcessPayslip({ onBack }) {
                 </button>
                 <button 
                   type="submit" 
-                  style={{ backgroundColor: '#7c3aed', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', cursor: 'pointer' }}
+                  style={{ backgroundColor: 'var(--clr-primary)', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', cursor: 'pointer' }}
                 >
                   Save & Process
                 </button>
@@ -686,7 +686,7 @@ export default function ProcessPayslip({ onBack }) {
                 </button>
                 <button 
                   type="submit" 
-                  style={{ backgroundColor: '#7c3aed', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', cursor: 'pointer' }}
+                  style={{ backgroundColor: 'var(--clr-primary)', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', cursor: 'pointer' }}
                 >
                   Update Record
                 </button>

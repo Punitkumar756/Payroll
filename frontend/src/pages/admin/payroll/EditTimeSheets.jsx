@@ -375,7 +375,7 @@ export default function EditTimeSheets({ onBack }) {
           onClick={onBack}
           style={{
             display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none',
-            color: '#7c3aed', fontWeight: '600', fontSize: '13px', cursor: 'pointer', marginBottom: '16px', padding: 0
+            color: 'var(--clr-primary)', fontWeight: '600', fontSize: '13px', cursor: 'pointer', marginBottom: '16px', padding: 0
           }}
         >
           <ArrowLeft size={16} /> Back to Dashboard
@@ -393,7 +393,7 @@ export default function EditTimeSheets({ onBack }) {
           </div>
           <button 
             onClick={() => setIsCreateModalOpen(true)}
-            style={{ backgroundColor: '#7c3aed', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            style={{ backgroundColor: 'var(--clr-primary)', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: '600', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', whiteSpace: 'nowrap' }}
           >
             <Plus size={14} /> Create New Time Sheet
           </button>
@@ -598,7 +598,7 @@ export default function EditTimeSheets({ onBack }) {
                 
                 {/* Days Worked Details Box */}
                 <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', backgroundColor: '#f8fafc' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#7c3aed', fontWeight: '700', fontSize: '13px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--clr-primary)', fontWeight: '700', fontSize: '13px' }}>
                     <Calendar size={16} /> Days Worked Details
                   </div>
 
@@ -632,7 +632,7 @@ export default function EditTimeSheets({ onBack }) {
 
                 {/* Hours Worked Details Box */}
                 <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', backgroundColor: '#f8fafc' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#7c3aed', fontWeight: '700', fontSize: '13px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--clr-primary)', fontWeight: '700', fontSize: '13px' }}>
                     <Clock size={16} /> Hours Worked Details
                   </div>
 
@@ -688,7 +688,7 @@ export default function EditTimeSheets({ onBack }) {
                   type="button"
                   onClick={handleUpdate}
                   disabled={submitting}
-                  style={{ backgroundColor: '#7c3aed', border: 'none', borderRadius: '6px', padding: '8px 24px', fontSize: '12px', fontWeight: '600', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.7 : 1 }}
+                  style={{ backgroundColor: 'var(--clr-primary)', border: 'none', borderRadius: '6px', padding: '8px 24px', fontSize: '12px', fontWeight: '600', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.7 : 1 }}
                 >
                   {submitting ? 'Updating...' : 'Update'}
                 </button>
@@ -776,7 +776,7 @@ export default function EditTimeSheets({ onBack }) {
                 <button 
                   type="submit"
                   disabled={submitting}
-                  style={{ backgroundColor: '#7c3aed', border: 'none', borderRadius: '6px', padding: '8px 24px', fontSize: '12px', fontWeight: '600', color: '#ffffff', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.7 : 1 }}
+                  style={{ backgroundColor: 'var(--clr-primary)', border: 'none', borderRadius: '6px', padding: '8px 24px', fontSize: '12px', fontWeight: '600', color: '#ffffff', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.7 : 1 }}
                 >
                   {submitting ? 'Creating...' : 'Create Time Sheet'}
                 </button>
