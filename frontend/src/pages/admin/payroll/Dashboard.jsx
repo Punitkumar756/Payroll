@@ -145,7 +145,7 @@ export default function SingleFileDashboard() {
           const empResponse = await fetch('http://localhost:5000/api/payroll/employees');
           if (empResponse.ok) {
             const empData = await empResponse.json();
-            setEmployeeRows(empData);
+            setEmployeeRows(empData.data || []);
           }
         } catch (e) {
           console.error("Failed to fetch employees", e);
