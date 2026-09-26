@@ -139,6 +139,18 @@ export default function SingleFileDashboard() {
 
         setStatsData(formattedStats);
         setDepartmentData(formattedDepartments);
+
+        // Fetch Employees
+        try {
+          const empResponse = await fetch('http://localhost:5000/api/payroll/employees');
+          if (empResponse.ok) {
+            const empData = await empResponse.json();
+            setEmployeeRows(empData);
+          }
+        } catch (e) {
+          console.error("Failed to fetch employees", e);
+        }
+
         setLoading(false);
       } catch (error) {
         // Fallback default mock data matching the screenshot
