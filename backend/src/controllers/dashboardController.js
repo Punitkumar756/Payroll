@@ -46,3 +46,15 @@ export const getEmployeeDashboard = async (req, res, next) => {
     next(e);
   }
 };
+
+export const getHRMonitoring = async (req, res, next) => {
+  try {
+    const { date } = req.query;
+    const targetDate = date || new Date().toISOString().split("T")[0];
+    const data = await callSP("sp_dashboard_hr_monitoring", [req.user.role, targetDate]);
+    res.json(data);
+  } catch (e) {
+    next(e);
+  }
+};
+

@@ -476,6 +476,32 @@ private fun AttendanceSummaryCard(att: AttendanceRecord?) {
                             if (expectedOutStr != null) {
                                 Text(expectedOutStr, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.SemiBold)
                             }
+                            
+                            val timingStatus = try {
+                                val inInstant = java.time.Instant.parse(att.clock_in)
+                                val inTime = java.time.LocalDateTime.ofInstant(inInstant, java.time.ZoneId.systemDefault()).toLocalTime()
+                                val st = java.time.LocalTime.parse(att.start_time)
+                                val duration = java.time.Duration.between(st, inTime)
+                                val diffMins = duration.toMinutes()
+                                if (diffMins > 0) {
+                                    val h = diffMins / 60
+                                    val m = diffMins % 60
+                                    if (h > 0) "Late by ${h}h ${m}m" else "Late by ${m}m"
+                                } else if (diffMins < 0) {
+                                    val absMins = -diffMins
+                                    val h = absMins / 60
+                                    val m = absMins % 60
+                                    if (h > 0) "Early by ${h}h ${m}m" else "Early by ${m}m"
+                                } else {
+                                    "On time"
+                                }
+                            } catch (e: Exception) {
+                                null
+                            }
+                            if (timingStatus != null) {
+                                val color = if (timingStatus.startsWith("Late")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                Text(timingStatus, style = MaterialTheme.typography.bodySmall, color = color, fontWeight = FontWeight.SemiBold)
+                            }
                         }
                     }
                 }

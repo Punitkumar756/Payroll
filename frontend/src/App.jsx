@@ -38,6 +38,17 @@ import UsersRolesPage from "./pages/admin/UsersRolesPage";
 import AssignTaskPage from "./pages/admin/tasks/AssignTaskPage";
 import TaskTrackerPage from "./pages/admin/tasks/TaskTrackerPage";
 
+import HrMonitoringPage from "./pages/admin/HrMonitoringPage";
+
+// Admin — Payroll
+import PayrollDashboard from "./pages/admin/payroll/Dashboard";
+import PayrollAdvancePayments from "./pages/admin/payroll/AdvancePayments";
+import PayrollSalaryHead from "./pages/admin/payroll/SalaryHead";
+import PayrollEditTimeSheets from "./pages/admin/payroll/EditTimeSheets";
+import PayrollPayslip from "./pages/admin/payroll/payslip";
+import PayrollProcessPayslip from "./pages/admin/payroll/processPayslip";
+import PayrollApprovePayslip from "./pages/admin/payroll/ApprovePayslip";
+
 // Admin — Attendance
 import ShiftsPage from "./pages/admin/attendance/ShiftsPage";
 import AssignShiftPage from "./pages/admin/attendance/AssignShiftPage";
@@ -122,6 +133,7 @@ export default function App() {
               path="dashboard"
               element={<AdminDashboard />}
             />
+            <Route path="monitoring" element={<HrMonitoringPage />} />
 
             {/* Masters */}
             <Route path="masters/locations" element={<LocationsPage />} />
@@ -178,6 +190,15 @@ export default function App() {
             />
             <Route path="attendance/lock" element={<LockPeriodPage />} />
 
+            {/* Payroll */}
+            <Route path="payroll/dashboard" element={<PayrollDashboard />} />
+            <Route path="payroll/advance-payments" element={<PayrollAdvancePayments />} />
+            <Route path="payroll/salary-head" element={<PayrollSalaryHead />} />
+            <Route path="payroll/timesheets" element={<PayrollEditTimeSheets />} />
+            <Route path="payroll/payslips" element={<PayrollPayslip />} />
+            <Route path="payroll/process-payslip" element={<PayrollProcessPayslip />} />
+            <Route path="payroll/approve-payslip" element={<PayrollApprovePayslip />} />
+            
             {/* Leave */}
             <Route path="leave/types" element={<LeaveTypesPage />} />
             <Route path="leave/policies" element={<LeavePoliciesPage />} />

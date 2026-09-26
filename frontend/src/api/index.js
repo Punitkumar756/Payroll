@@ -190,6 +190,7 @@ export const leaveApi = {
 export const dashboardApi = {
   getMetrics: () => api.get("/dashboard/metrics").then((r) => r.data),
   getCharts: () => api.get("/dashboard/charts").then((r) => r.data),
+  getMonitoring: (params) => api.get("/dashboard/monitoring", { params }).then((r) => r.data),
 };
 
 // ── Tasks ─────────────────────────────────────────────────────

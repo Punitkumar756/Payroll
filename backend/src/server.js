@@ -52,6 +52,23 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/tasks", tasksRoutes);
 
+// Payroll Routes
+import payrollDashboardRoutes from "./routes/payroll/dashboardRoutes.js";
+import payrollEmployeeRoutes from "./routes/payroll/employeeRoutes.js";
+import advancePaymentRoutes from "./routes/payroll/advancePaymentRoutes.js";
+import salaryHeadRoutes from "./routes/payroll/salaryHeadRoutes.js";
+import timesheetRoutes from "./routes/payroll/timesheetRoutes.js";
+import payslipRoutes from "./routes/payroll/payslipRoutes.js";
+import payslipComponentRoutes from "./routes/payroll/payslipComponentRoutes.js";
+
+app.use("/api/payroll/dashboard", payrollDashboardRoutes);
+app.use("/api/payroll/employees", payrollEmployeeRoutes);
+app.use("/api/payroll/advance-payments", advancePaymentRoutes);
+app.use("/api/payroll/salary-heads", salaryHeadRoutes);
+app.use("/api/payroll/timesheets", timesheetRoutes);
+app.use("/api/payroll/payslips", payslipRoutes);
+app.use("/api/payroll/payslip-components", payslipComponentRoutes);
+
 // Health check
 app.get("/api/health", (_req, res) => {
   res.json({

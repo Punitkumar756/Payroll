@@ -5,7 +5,10 @@ import { useAuth } from "../auth/AuthContext";
 const navSections = [
   {
     label: "Overview",
-    items: [{ to: "/admin/dashboard", icon: "🏠", label: "Dashboard" }],
+    items: [
+      { to: "/admin/dashboard", icon: "🏠", label: "Dashboard" },
+      { to: "/admin/monitoring", icon: "👀", label: "HR Monitoring" }
+    ],
   },
   {
     label: "Configuration",
@@ -62,6 +65,18 @@ const navSections = [
       { to: "/admin/leave/approvals", icon: "✅", label: "Approvals" },
       { to: "/admin/leave/apply-behalf", icon: "📝", label: "Apply On Behalf" },
       { to: "/admin/leave/calendar", icon: "📆", label: "Leave Calendar" },
+    ],
+  },
+  {
+    label: "Payroll",
+    items: [
+      { to: "/admin/payroll/dashboard", icon: "💰", label: "Dashboard" },
+      { to: "/admin/payroll/salary-head", icon: "💼", label: "Salary Heads" },
+      { to: "/admin/payroll/advance-payments", icon: "💸", label: "Advances" },
+      { to: "/admin/payroll/timesheets", icon: "⏱️", label: "Timesheets" },
+      { to: "/admin/payroll/payslips", icon: "🧾", label: "Payslips" },
+      { to: "/admin/payroll/process-payslip", icon: "⚙️", label: "Process Payslip" },
+      { to: "/admin/payroll/approve-payslip", icon: "✅", label: "Approve Payslip" },
     ],
   },
 ];
