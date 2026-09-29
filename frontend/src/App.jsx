@@ -45,6 +45,7 @@ import PayrollDashboard from "./pages/admin/payroll/Dashboard";
 import PayrollAdvancePayments from "./pages/admin/payroll/AdvancePayments";
 import PayrollSalaryHead from "./pages/admin/payroll/SalaryHead";
 import PayrollEditTimeSheets from "./pages/admin/payroll/EditTimeSheets";
+import PayrollSalaryStructure from "./pages/admin/payroll/SalaryStructure";
 import PayrollPayslip from "./pages/admin/payroll/payslip";
 import PayrollProcessPayslip from "./pages/admin/payroll/processPayslip";
 import PayrollApprovePayslip from "./pages/admin/payroll/ApprovePayslip";
@@ -194,6 +195,7 @@ export default function App() {
             <Route path="payroll/dashboard" element={<PayrollDashboard />} />
             <Route path="payroll/advance-payments" element={<PayrollAdvancePayments />} />
             <Route path="payroll/salary-head" element={<PayrollSalaryHead />} />
+            <Route path="payroll/salary-structure" element={<PayrollSalaryStructure />} />
             <Route path="payroll/timesheets" element={<PayrollEditTimeSheets />} />
             <Route path="payroll/payslips" element={<PayrollPayslip />} />
             <Route path="payroll/process-payslip" element={<PayrollProcessPayslip />} />

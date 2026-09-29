@@ -34,6 +34,7 @@ export default function AdvancePayments({ onBack }) {
     employee: '',
     financialYear: '',
     payPeriod: '',
+    itemType: 'Earning',
     item: 'Advance Salary',
     remarks: '',
     amount: ''
@@ -125,6 +126,7 @@ export default function AdvancePayments({ onBack }) {
       employee: formData.employee,
       financialYear: formData.financialYear,
       payPeriod: formData.payPeriod,
+      itemType: formData.itemType,
       item: formData.item,
       remarks: formData.remarks.trim() || '-',
       amount: Number(rawAmount)
@@ -174,6 +176,7 @@ export default function AdvancePayments({ onBack }) {
       employee: employeeOptions[0] || '',
       financialYear: financialYearOptions[0] || '',
       payPeriod: payPeriodOptions[0] || '',
+      itemType: 'Earning',
       item: itemOptions[0] || 'Advance Salary',
       remarks: '',
       amount: ''
@@ -188,6 +191,7 @@ export default function AdvancePayments({ onBack }) {
       employee: item.employee,
       financialYear: item.financialYear,
       payPeriod: item.payPeriod,
+      itemType: item.itemType || 'Earning',
       item: item.item,
       remarks: item.remarks === '-' ? '' : item.remarks,
       amount: String(item.amount).replace(/,/g, '')
@@ -316,7 +320,7 @@ export default function AdvancePayments({ onBack }) {
               onClick={handleNew}
               style={{ backgroundColor: '#1d4ed8', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             >
-              <Plus size={15} /> Add Advance
+              <Plus size={15} /> NEW
             </button>
           </div>
         </div>
@@ -496,6 +500,20 @@ export default function AdvancePayments({ onBack }) {
                   </div>
                 </div>
 
+                {/* Item Type */}
+                <div>
+                  <label style={labelStyle}>Item Type <span style={{ color: '#ef4444' }}>*</span></label>
+                  <select 
+                    value={formData.itemType} 
+                    onChange={(e) => handleInputChange('itemType', e.target.value)}
+                    style={inputStyle}
+                    required
+                  >
+                    <option value="Earning">Earning</option>
+                    <option value="Deduction">Deduction</option>
+                  </select>
+                </div>
+
                 {/* Item */}
                 <div>
                   <label style={labelStyle}>Item <span style={{ color: '#ef4444' }}>*</span></label>
@@ -556,7 +574,7 @@ export default function AdvancePayments({ onBack }) {
                   style={{ backgroundColor: '#1d4ed8', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '8px 20px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', cursor: submitLoading ? 'not-allowed' : 'pointer', opacity: submitLoading ? 0.7 : 1 }}
                 >
                   {submitLoading ? <Loader size={15} /> : <Save size={15} />} 
-                  {submitLoading ? 'Saving...' : (editingId !== null ? 'Update Record' : 'Save Record')}
+                  {submitLoading ? 'Saving...' : (editingId !== null ? 'UPDATE' : 'ADD')}
                 </button>
               </div>
             </form>

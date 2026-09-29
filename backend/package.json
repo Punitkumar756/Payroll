@@ -2,7 +2,7 @@
   "name": "hrms-backend",
   "version": "1.0.0",
   "type": "module",
-  "description": "HRMS Backend - Ankit Infotech And Solution",
+  "description": "HRMS Backend - Dayton Natural Resource Pvt Ltd And Solution",
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon --watch src src/server.js",
