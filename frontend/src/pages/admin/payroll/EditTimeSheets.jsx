@@ -444,6 +444,12 @@ export default function EditTimeSheets({ onBack }) {
               </div>
 
               <button 
+                onClick={() => {}} // Could trigger explicit fetch if needed
+                style={{ backgroundColor: 'var(--clr-primary)', border: 'none', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', fontWeight: '600', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                GO
+              </button>
+              <button 
                 onClick={handleShowAll} 
                 style={{ backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', fontWeight: '600', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
@@ -497,6 +503,7 @@ export default function EditTimeSheets({ onBack }) {
                 <th style={{ padding: '12px 16px', fontWeight: '600', color: '#475569', backgroundColor: '#f8fafc' }}>Total Hours</th>
                 <th style={{ padding: '12px 16px', fontWeight: '600', color: '#475569', backgroundColor: '#f8fafc' }}>Status</th>
                 <th style={{ padding: '12px 16px', fontWeight: '600', color: '#475569', backgroundColor: '#f8fafc' }}>Last Updated On</th>
+                <th style={{ padding: '12px 16px', fontWeight: '600', color: '#475569', backgroundColor: '#f8fafc', textAlign: 'center' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -504,19 +511,8 @@ export default function EditTimeSheets({ onBack }) {
                 records.map((rec, idx) => (
                   <tr 
                     key={idx} 
-                    onClick={() => handleSelectEmployee(rec.code)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        handleSelectEmployee(rec.code);
-                      }
-                    }}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`Edit timesheet for ${rec.name}`}
                     style={{ 
                       borderBottom: '1px solid #f1f5f9', 
-                      cursor: 'pointer',
                       transition: 'background-color 0.15s ease'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
@@ -541,6 +537,17 @@ export default function EditTimeSheets({ onBack }) {
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px', color: '#64748b' }}>{rec.updated}</td>
+                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectEmployee(rec.code);
+                        }}
+                        style={{ backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '6px 12px', fontSize: '11px', fontWeight: '600', color: '#475569', cursor: 'pointer' }}
+                      >
+                        EDIT
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (

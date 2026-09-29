@@ -1,5 +1,5 @@
 -- =============================================================
---  HRMS — Ankit Infotech And Solution
+--  HRMS — Dayton Natural Resource Pvt Ltd And Solution
 --  Migration 001: Full Schema
 --  MySQL 8.x
 -- =============================================================

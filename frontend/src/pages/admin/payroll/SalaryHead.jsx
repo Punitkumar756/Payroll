@@ -480,7 +480,7 @@ const styles = {
     borderRadius: '6px',
     outline: 'none',
     boxSizing: 'border-box',
-    color: '#ebecf0', // Fixed low contrast bug
+    color: '#0f172a',
   },
   selectWrapper: {
     position: 'relative',
@@ -515,7 +515,7 @@ const styles = {
     borderRadius: '6px',
     outline: 'none',
     boxSizing: 'border-box',
-    color: '#edeff4', // Fixed low contrast bug
+    color: '#0f172a',
     resize: 'vertical',
     fontFamily: 'inherit',
   },

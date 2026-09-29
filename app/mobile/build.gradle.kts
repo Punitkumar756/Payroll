@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "com.ankitinfotech.employeeapp"
+    namespace = "com.daytonnaturalresource.employeeapp"
     compileSdk = 35
     buildToolsVersion = "34.0.0"
 
     defaultConfig {
-        applicationId = "com.ankitinfotech.employeeapp"
+        applicationId = "com.daytonnaturalresource.employeeapp"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

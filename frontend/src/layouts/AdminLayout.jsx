@@ -72,6 +72,7 @@ const navSections = [
     items: [
       { to: "/admin/payroll/dashboard", icon: "💰", label: "Dashboard" },
       { to: "/admin/payroll/salary-head", icon: "💼", label: "Salary Heads" },
+      { to: "/admin/payroll/salary-structure", icon: "🏗️", label: "Salary Structure" },
       { to: "/admin/payroll/advance-payments", icon: "💸", label: "Advances" },
       { to: "/admin/payroll/timesheets", icon: "⏱️", label: "Timesheets" },
       { to: "/admin/payroll/payslips", icon: "🧾", label: "Payslips" },
