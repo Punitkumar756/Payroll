@@ -1,4 +1,4 @@
-# HRMS & Payroll System
+<img width="5789" height="5527" alt="diagram" src="https://github.com/user-attachments/assets/ceeaa752-d379-4d7c-a82c-edb2aa0db6d7" /><img width="6722" height="8971" alt="diagram (1)" src="https://github.com/user-attachments/assets/ed9c6977-5837-4821-8658-cd6bbec6b3f2" /># HRMS & Payroll System
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -44,10 +44,8 @@ pay/
 - **`/db`**: SQL procedures, tables, and migration scripts for the MySQL database.
 
 ---
-
-
-
-
+## project diagram
+<img width="5789" height="5527" alt="diagram" src="https://github.com/user-attachments/assets/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" />
 
 ## 🛠️ Tech Stack
 
