@@ -45,6 +45,11 @@ pay/
 
 ---
 
+
+## Project Diagram
+![Uploading diagram (1).png…]()
+
+
 ## 🛠️ Tech Stack
 
 ### Frontend (Web)
