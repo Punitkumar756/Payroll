@@ -44,8 +44,7 @@ pay/
 - **`/db`**: SQL procedures, tables, and migration scripts for the MySQL database.
 
 ---
-## project diagram
-<img width="5789" height="5527" alt="diagram" src="https://github.com/user-attachments/assets/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" />
+
 
 ## 🛠️ Tech Stack
 
